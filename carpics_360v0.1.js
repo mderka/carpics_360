@@ -1,10 +1,24 @@
+if(!window.DisableCarpicsAnalytics){
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','CarPicsGoogleAnalytics');
+
+    CarPicsGoogleAnalytics('create', 'UA-101099694-1','auto');
+    CarPicsGoogleAnalytics('send', 'pageview', {
+      'dimension3':  'Page view'
+    })
+
+} else {
+    CarPicsGoogleAnalytics = function(){};
+}
 /*
 * Defines the CarPics Spinner API and exposes it to global scope.  Only reference in global scope is: CarPicsSpinnerAPI
 */
 var CarPicsSpinnerAPI = (function() {
-	/** 
-	* Internal constructors for building spinners, including making spinners with an asynchronous get call. 
-	*/
+    /** 
+    * Internal constructors for building spinners, including making spinners with an asynchronous get call. 
+    */
     this.CarPicsSpinners = function(config) {
         this.spinners = {};
         /**
@@ -50,6 +64,8 @@ var CarPicsSpinnerAPI = (function() {
     * Spinner class.  One spinner div will correspond to one CarPicsSpinner. 
     */
     this.CarPicsSpinner = function(config, data) {
+        this.StartTime = Date.now();
+        this.connectionsFinished = 0;
         this.divId = config.divId;
         this.data = data;
         this.numberOfConnections = config.numberOfConnections > 0 ? config.numberOfConnections : 4;
@@ -152,6 +168,7 @@ var CarPicsSpinnerAPI = (function() {
                 var complete = this.loadLinear();
             }
             if (complete) {
+                this.connectionsFinished ++ ;
                 this.onAllLoaded();
             }
         }
@@ -270,17 +287,21 @@ var CarPicsSpinnerAPI = (function() {
         // Mouse events:
         if (!this.mouseDisabled) {
 
-        	/*
-        	* Mousedown event starts manual rotation (drag spin)
-        	*/
+            /*
+            * Mousedown event starts manual rotation (drag spin)
+            */
             $(document).on("mousedown", "#" + this.divId, (function(thisObj) {
                 return function(baseEvent) {
                     baseEvent.preventDefault();
                     var thisTouch = Date.now();
-
                     if (thisObj.zoomed || baseEvent.button === 2) {
                         return;
                     }
+                    if(thisObj.interacted){
+                        CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
+                        thisObj.interacted=true;
+                    }
+                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
                     thisObj.spinStatus = false;
                     thisObj.turnStatus = true;
                     thisObj.mouseXPosition = baseEvent.pageX;
@@ -291,11 +312,12 @@ var CarPicsSpinnerAPI = (function() {
                 }
             })(this));
 
-        	/*
-        	* Doubleclick triggers desktop zoom event.
-        	*/
+            /*
+            * Doubleclick triggers desktop zoom event.
+            */
             $(document).on("dblclick", "#" + this.divId, (function(thisObj) {
                 return function(baseEvent) {
+                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Doubleclick'});
                     baseEvent.preventDefault();
                     var releaseMouse = thisObj.zoomToggle(baseEvent);
                     if (thisObj.zoomed === true) {
@@ -309,14 +331,19 @@ var CarPicsSpinnerAPI = (function() {
                 }
             })(this));
 
-        	/*
-        	* Taphold event triggers both mobile and desktop zoom events.
-        	*/
+            /*
+            * Taphold event triggers both mobile and desktop zoom events.
+            */
             $(document).on("taphold", "#" + this.divId, (function(thisObj) {
                 return function(baseEvent) {
                     if (thisObj.turning == true) {
                         return;
                     }
+                    if(thisObj.interacted){
+                        CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Taphold'});
+                        thisObj.interacted=true;
+                    }
+                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Taphold'});
                     baseEvent.preventDefault();
                     var releaseMouse = thisObj.zoomToggle(baseEvent, {
                         "x": thisObj.mouseXPosition,
@@ -333,9 +360,9 @@ var CarPicsSpinnerAPI = (function() {
                 }
             })(this));
 
-        	/*
-        	* Mouseup event ends drag status.
-        	*/
+            /*
+            * Mouseup event ends drag status.
+            */
             $(document).on("mouseup", (function(thisObj) {
                 return function(baseEvent) {
                     baseEvent.preventDefault();
@@ -351,9 +378,9 @@ var CarPicsSpinnerAPI = (function() {
                 }
             })(this));
 
-        	/*
-        	* Mousemove moves zoom viewport or allows drag spin, depending on current status.
-        	*/
+            /*
+            * Mousemove moves zoom viewport or allows drag spin, depending on current status.
+            */
             $(document).on("mousemove", (function(thisObj) {
                 return function(baseEvent) {
                     if (thisObj.pauseMouseTime > Date.now()) {
@@ -380,11 +407,11 @@ var CarPicsSpinnerAPI = (function() {
                 }
             })(this));
 
-        	/*
-        	* Touchstart event starts manual rotation (drag spin), also needed to bind 
-        	* move events to prevent passive listener warnings and failure of touchmove events.
-        	* Also needed to capture position of touchhold event for zooming.
-        	*/
+            /*
+            * Touchstart event starts manual rotation (drag spin), also needed to bind 
+            * move events to prevent passive listener warnings and failure of touchmove events.
+            * Also needed to capture position of touchhold event for zooming.
+            */
             $("#" + this.divId).bind('touchstart', (function(thisObj) {
                 return function(event) {
                     event.preventDefault();
@@ -393,6 +420,11 @@ var CarPicsSpinnerAPI = (function() {
                     if (thisObj.zoomed) {
                         return;
                     }
+                    if(thisObj.interacted){
+                        CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Touchstart'});
+                        thisObj.interacted=true;
+                    }
+                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Touchstart'});
                     thisObj.spinStatus = false;
                     thisObj.turnStatus = true;
                     var touch = event.originalEvent.touches[0] || event.originalEvent.changedTouches[0];
@@ -434,9 +466,9 @@ var CarPicsSpinnerAPI = (function() {
                 }
             })(this));
 
-        	/*
-        	* Touchend event ends manual drag.
-        	*/
+            /*
+            * Touchend event ends manual drag.
+            */
             $(document).on('touchend', "#" + this.divId, (function(thisObj) {
                 return function(event) {
                     if (thisObj.mouseDisabled) {
@@ -511,8 +543,10 @@ var CarPicsSpinnerAPI = (function() {
     */
     this.CarPicsImage = function(source, index, div, callback) {
         var indicateReady = (function(thisObj, index) {
-            return function() {
-                thisObj.isReady = true;
+            return function(ready) {
+                if(ready){
+                    thisObj.isReady = true;
+                } 
             }
         })(this, index);
         /*
@@ -587,6 +621,7 @@ var CarPicsSpinnerAPI = (function() {
                 return false
             };
         }
+        this.imageLoadStart = Date.now();
         this.NextImage = this;
         this.PreviousImage = this;
         this.Index = index;
@@ -599,9 +634,12 @@ var CarPicsSpinnerAPI = (function() {
         this.HTMLElement.setAttribute("id", this.elementId);
         this.HTMLElement.addEventListener("load", function() {
             callback();
-            indicateReady()
+            indicateReady(true)
         });
-        this.HTMLElement.addEventListener("error", callback);
+        this.HTMLElement.addEventListener("error", function(){
+            callback()
+            indicateReady(false);
+        });
     }
     return this;
 })();
