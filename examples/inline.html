@@ -28,6 +28,20 @@
          });
       </script>
       <script>
+        if(!window.DisableCarpicsAnalytics){
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','https://www.google-analytics.com/analytics.js','CarPicsGoogleAnalytics');
+
+            CarPicsGoogleAnalytics('create', 'UA-101099694-1','auto');
+            CarPicsGoogleAnalytics('send', 'pageview', {
+              'dimension3':  'Page view'
+            })
+
+        } else {
+            CarPicsGoogleAnalytics = function(){};
+        }
         /*
         * Defines the CarPics Spinner API and exposes it to global scope.  Only reference in global scope is: CarPicsSpinnerAPI
         */
@@ -80,6 +94,8 @@
             * Spinner class.  One spinner div will correspond to one CarPicsSpinner. 
             */
             this.CarPicsSpinner = function(config, data) {
+                this.StartTime = Date.now();
+                this.connectionsFinished = 0;
                 this.divId = config.divId;
                 this.data = data;
                 this.numberOfConnections = config.numberOfConnections > 0 ? config.numberOfConnections : 4;
@@ -182,6 +198,7 @@
                         var complete = this.loadLinear();
                     }
                     if (complete) {
+                        this.connectionsFinished ++ ;
                         this.onAllLoaded();
                     }
                 }
@@ -307,10 +324,14 @@
                         return function(baseEvent) {
                             baseEvent.preventDefault();
                             var thisTouch = Date.now();
-
                             if (thisObj.zoomed || baseEvent.button === 2) {
                                 return;
                             }
+                            if(thisObj.interacted){
+                                CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
+                                thisObj.interacted=true;
+                            }
+                            CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
                             thisObj.spinStatus = false;
                             thisObj.turnStatus = true;
                             thisObj.mouseXPosition = baseEvent.pageX;
@@ -326,6 +347,7 @@
                     */
                     $(document).on("dblclick", "#" + this.divId, (function(thisObj) {
                         return function(baseEvent) {
+                            CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Doubleclick'});
                             baseEvent.preventDefault();
                             var releaseMouse = thisObj.zoomToggle(baseEvent);
                             if (thisObj.zoomed === true) {
@@ -347,6 +369,11 @@
                             if (thisObj.turning == true) {
                                 return;
                             }
+                            if(thisObj.interacted){
+                                CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Taphold'});
+                                thisObj.interacted=true;
+                            }
+                            CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Taphold'});
                             baseEvent.preventDefault();
                             var releaseMouse = thisObj.zoomToggle(baseEvent, {
                                 "x": thisObj.mouseXPosition,
@@ -423,6 +450,11 @@
                             if (thisObj.zoomed) {
                                 return;
                             }
+                            if(thisObj.interacted){
+                                CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Touchstart'});
+                                thisObj.interacted=true;
+                            }
+                            CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Touchstart'});
                             thisObj.spinStatus = false;
                             thisObj.turnStatus = true;
                             var touch = event.originalEvent.touches[0] || event.originalEvent.changedTouches[0];
@@ -541,8 +573,10 @@
             */
             this.CarPicsImage = function(source, index, div, callback) {
                 var indicateReady = (function(thisObj, index) {
-                    return function() {
-                        thisObj.isReady = true;
+                    return function(ready) {
+                        if(ready){
+                            thisObj.isReady = true;
+                        } 
                     }
                 })(this, index);
                 /*
@@ -617,6 +651,7 @@
                         return false
                     };
                 }
+                this.imageLoadStart = Date.now();
                 this.NextImage = this;
                 this.PreviousImage = this;
                 this.Index = index;
@@ -629,9 +664,12 @@
                 this.HTMLElement.setAttribute("id", this.elementId);
                 this.HTMLElement.addEventListener("load", function() {
                     callback();
-                    indicateReady()
+                    indicateReady(true)
                 });
-                this.HTMLElement.addEventListener("error", callback);
+                this.HTMLElement.addEventListener("error", function(){
+                    callback()
+                    indicateReady(false);
+                });
             }
             return this;
         })();
@@ -665,7 +703,6 @@
                 spinners: spinners
             });
         });
-
       </script>
       <p>
          A page showing multiple spinners of several types, as well as an auto-spinner made to follow the mouse around.
