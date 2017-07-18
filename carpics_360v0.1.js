@@ -90,11 +90,41 @@ var CarPicsSpinnerAPI = (function() {
         if (typeof config.overrideSize !== "undefined" &&
             typeof config.overrideSize.width &&
             typeof config.overrideSize.height) {
-            var element = document.getElementById(config.divId);
+            var element = document.getElementById(this.divId);
             element.style.width = config.overrideSize.width;
             element.style.height = config.overrideSize.height;
         }
         this.spinnerDiv = document.getElementById(this.divId);
+        if(typeof config.overlaySource != "undefined") {
+            this.spinnerOverlay = document.createElement("div");
+
+            this.spinnerOverlay.style.height="100%";
+            this.spinnerOverlay.style.width="100%";
+            this.spinnerOverlay.style.zIndex=100;
+            this.spinnerOverlay.style.position="absolute";
+            var img = new Image();
+            img.src = config.overlaySource ;
+            img.style.width="80%";
+            img.style.height="auto";
+            img.style.position="absolute";
+            img.style.margin="auto";
+            img.style.top=0;
+            img.style.right=0;
+            img.style.bottom=0;
+            img.style.left=0;
+            this.spinnerOverlay.onmouseover = (function(div){
+                return function(event){
+                    div.style.visibility="hidden";
+                }
+            })(img);
+            this.spinnerOverlay.onmouseout = (function(div){
+                return function(event){
+                    div.style.visibility="";
+                }
+            })(img);
+            this.spinnerOverlay.appendChild(img);
+            this.spinnerDiv.appendChild(this.spinnerOverlay);
+        }
         /*
         * Chooses the next image to load by halfing the distance from the current cursor to the next cursor.
         * If no images need to load, move the loadcursor forward one until cursor has moved n times or has found
@@ -666,7 +696,8 @@ $(document).ready( function() {
             overrideSize: {
                 overrideWidth: div.getAttribute("overrideWidth"),
                 overrideHeight: div.getAttribute("overrideHeight")
-            }
+            },
+            overlaySource:div.getAttribute("overlaySource")
         });
     }
     var Spinners = new CarPicsSpinnerAPI.CarPicsSpinners({
