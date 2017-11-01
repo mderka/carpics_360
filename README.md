@@ -56,8 +56,7 @@ In the same HTML document as this is defined, then add a script tag referencing 
 - class : value="CarPicsSpinner" - The library gets elements by class, and sets up a spinner in any div with classvalue = "CarPicsSpinner".
 - vin : value="<vin string>" - The vehicle vin, used to lookup the spinner resource. This information will be available in the system that generates that vehicle page.
 - dealer : value="<dealer id string>" - The dealer ID, used with vin to lookup the spinner resource. You will be assigned your dealer ID by Car Pics 2.0 when signing up for the 360 product.
-
-
+- width, height : (Styling properties) - The width and height for this tool should match the aspect ratio decided when setting up with Car Pics 2.0.  As long as aspect ratio is maintained, any size is supported.
 ### All div attribute configs: 
 - id - valid value:<string, unique> - Unique identifier of the spinner div.
 - class - valid value:"CarPicsSpinner" - Indication that a given div is in fact a CarPicsSpinner.
