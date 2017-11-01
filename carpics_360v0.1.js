@@ -26,9 +26,6 @@ var CarPicsSpinnerAPI = (function() {
         */
         this.makeBoundGetRequest = function(config, thisObj) {
             return function(data) {
-                if (data.length==0){
-                    return;
-                }
                 thisObj.spinners[config.divId].spinner = new CarPicsSpinner(config, data);
                 thisObj.spinners[config.divId].spinStatus = false;
             }
@@ -67,6 +64,12 @@ var CarPicsSpinnerAPI = (function() {
         this.StartTime = Date.now();
         this.connectionsFinished = 0;
         this.divId = config.divId;
+        if(data === null || typeof data == "undefined" || data.length==0){
+            var element = document.getElementById(this.divId);
+            element.style.backgroundImage="url('http://resources.carpics2p0.com/Rotation/checkerboard-backgrounds-wallpapers.jpg')"
+            element.style.repeat="repeat"
+            return;
+        }
         this.data = data;
         this.numberOfConnections = config.numberOfConnections > 0 ? config.numberOfConnections : 4;
         this.AllLoded = false;
@@ -77,7 +80,7 @@ var CarPicsSpinnerAPI = (function() {
         this.autospinSleep = config.autospinSleep > 0 ? config.autospinSleep : 100;
         this.mouseDisabled = config.disableMouse || false;
         this.zoomed = false;
-        this.spinSensitivity = config.spinSensitivity >= 0 ? config.spinSensitivity : 5;
+        this.spinSensitivity = parseInt(config.spinSensitivity) > 0 ? parseInt(config.spinSensitivity) : 5;
         this.direction = config.autospinDirection || 1;
         if (config.spinOnLoad == "false") {
             this.spinDefault = config.autospin == "true" || false;
@@ -95,7 +98,7 @@ var CarPicsSpinnerAPI = (function() {
             element.style.height = config.overrideSize.height;
         }
         this.spinnerDiv = document.getElementById(this.divId);
-        if(typeof config.overlaySource != "undefined") {
+        if(typeof config.overlaySource != "undefined" && config.overlaySource !== null) {
             this.spinnerOverlay = document.createElement("div");
 
             this.spinnerOverlay.style.height="100%";
@@ -308,6 +311,8 @@ var CarPicsSpinnerAPI = (function() {
             if (!nextImage.isReady) {
                 return;
             }
+            this.spinnerDiv.style.backgroundImage = "url('" + this.CurrentImage.sourceObject.src + "')";
+            this.spinnerDiv.style.backgroundSize = "100% 100%";
             var previous = this.CurrentImage;
             this.CurrentImage = nextImage;
             this.CurrentImage.HTMLElement.style.display = "block";
@@ -422,18 +427,21 @@ var CarPicsSpinnerAPI = (function() {
                     var currentXPosition = baseEvent.pageX;
                     var currentYPosition = baseEvent.pageY;
                     if (thisObj.zoomed == true) {
-                        thisObj.CurrentImage.move(thisObj.mouseXPosition, thisObj.mouseYPosition);
-                    } else if (thisObj.mouseXPosition - currentXPosition > thisObj.spinSensitivity) {
-                        thisObj.turning = true;
-                        thisObj.displayNextImage(1);
-                    } else if (currentXPosition - thisObj.mouseXPosition > thisObj.spinSensitivity) {
-                        thisObj.turning = true;
-                        thisObj.displayNextImage(-1);
+                        thisObj.CurrentImage.move(currentXPosition, currentYPosition);
                     } else {
-                        return;
+                        while (thisObj.mouseXPosition - currentXPosition > thisObj.spinSensitivity){
+                            thisObj.turning = true;
+                            thisObj.displayNextImage(1);
+                            thisObj.mouseYPosition = currentYPosition;
+                            thisObj.mouseXPosition = thisObj.mouseXPosition - thisObj.spinSensitivity;
+                        }
+                        while (currentXPosition - thisObj.mouseXPosition > thisObj.spinSensitivity) {
+                            thisObj.turning = true;
+                            thisObj.displayNextImage(-1);
+                            thisObj.mouseYPosition = currentYPosition;
+                            thisObj.mouseXPosition = thisObj.mouseXPosition + thisObj.spinSensitivity;
+                        } 
                     }
-                    thisObj.mouseYPosition = currentYPosition;
-                    thisObj.mouseXPosition = currentXPosition;
                 }
             })(this));
 
@@ -478,17 +486,20 @@ var CarPicsSpinnerAPI = (function() {
                                 var currentYPosition = touch.pageY;
                                 if (thisInternal.zoomed == true) {
                                     thisInternal.CurrentImage.move(thisObj.mouseXPosition, thisObj.mouseYPosition);
-                                } else if (thisInternal.mouseXPosition - currentXPosition > thisInternal.spinSensitivity) {
-                                    thisObj.turning = true;
-                                    thisInternal.displayNextImage(1);
-                                } else if (currentXPosition - thisInternal.mouseXPosition > thisInternal.spinSensitivity) {
-                                    thisObj.turning = true;
-                                    thisInternal.displayNextImage(-1);
                                 } else {
-                                    return;
+                                    while (thisInternal.mouseXPosition - currentXPosition > thisInternal.spinSensitivity) {
+                                        thisObj.turning = true;
+                                        thisInternal.displayNextImage(1);
+                                        thisInternal.mouseYPosition = currentYPosition;
+                                        thisInternal.mouseXPosition = thisObj.mouseXPosition - thisObj.spinSensitivity;
+                                    } 
+                                    while (currentXPosition - thisInternal.mouseXPosition > thisInternal.spinSensitivity) {
+                                        thisInternal.mouseYPosition = currentYPosition;
+                                        thisInternal.mouseXPosition = thisObj.mouseXPosition + thisObj.spinSensitivity;
+                                        thisObj.turning = true;
+                                        thisInternal.displayNextImage(-1);
+                                    }
                                 }
-                                thisInternal.mouseYPosition = currentYPosition;
-                                thisInternal.mouseXPosition = currentXPosition;
                                 thisInternal.pauseMouseTime = Date.now() + 25;
                             }
                         }
@@ -590,12 +601,7 @@ var CarPicsSpinnerAPI = (function() {
             this.HTMLElement.style.width = "200%";
             var clientX = baseEvent.type == "taphold" ? tapholdCoordinates.x - window.scrollX : baseEvent.clientX;
             var clientY = baseEvent.type == "taphold" ? tapholdCoordinates.y - window.scrollY : baseEvent.clientY;
-            var xOffsetCenter = (offset.width / 2 - (clientX - offset.left));
-            var yOffsetCenter = (offset.height / 2 - (clientY - offset.top));
-            var x = xOffsetCenter - offset.width / 2;
-            var y = yOffsetCenter - offset.height / 2;
-            this.HTMLElement.style.left = x / document.documentElement.clientWidth * 100 + 'vw';
-            this.HTMLElement.style.top = y / document.documentElement.clientWidth * 100 + 'vw';
+            this.move(clientX,clientY);
         }
         /*
         * Resets element to default after zoom end.
@@ -628,13 +634,17 @@ var CarPicsSpinnerAPI = (function() {
         * Default Image styles and sets up transitions which make movements nicer.
         */
         this.setDefaultImageStyles = function() {
-            this.HTMLElement.style.position = 'relative';
+            this.HTMLElement.style.position = "relative";
             this.HTMLElement.style.maxHeight = "100%";
             this.HTMLElement.style.maxWidth = "100%";
             this.HTMLElement.style.height = "100%";
             this.HTMLElement.style.width = "100%";
             this.HTMLElement.style.left = "0vw";
             this.HTMLElement.style.top = "0vw";
+            this.imgElement.style.maxHeight = "100%";
+            this.imgElement.style.maxWidth = "100%";
+            this.imgElement.style.height = "100%";
+            this.imgElement.style.width = "100%";
             this.HTMLElement.style.overflow = "hidden";
             this.HTMLElement.style.transition = "all .5s linear";
             this.HTMLElement.style.mozTransition = "all .5s linear";
@@ -658,15 +668,17 @@ var CarPicsSpinnerAPI = (function() {
         this.isReady = false;
         this.sourceObject = source;
         this.elementId = div + "-" + source.src;
-        this.HTMLElement = document.createElement("img");
+        this.imgElement = document.createElement("img");
+        this.HTMLElement = document.createElement("div");
+        this.HTMLElement.appendChild(this.imgElement);
         this.setDefaultImageStyles();
-        this.HTMLElement.setAttribute("src", source.src);
+        this.imgElement.setAttribute("src", source.src);
         this.HTMLElement.setAttribute("id", this.elementId);
-        this.HTMLElement.addEventListener("load", function() {
-            callback();
-            indicateReady(true)
+        this.imgElement.addEventListener("load", function() {
+                callback();
+                indicateReady(true)
         });
-        this.HTMLElement.addEventListener("error", function(){
+        this.imgElement.addEventListener("error", function(){
             callback()
             indicateReady(false);
         });
