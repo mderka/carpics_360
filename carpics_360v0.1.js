@@ -13,17 +13,17 @@ if(!window.DisableCarpicsAnalytics){
     CarPicsGoogleAnalytics = function(){};
 }
 /*
-* Defines the CarPics Spinner API and exposes it to global scope.  Only reference in global scope is: CarPicsSpinnerAPI
-*/
+ * Defines the CarPics Spinner API and exposes it to global scope.  Only reference in global scope is: CarPicsSpinnerAPI
+ */
 var CarPicsSpinnerAPI = (function() {
     /** 
-    * Internal constructors for building spinners, including making spinners with an asynchronous get call. 
-    */
+     * Internal constructors for building spinners, including making spinners with an asynchronous get call. 
+     */
     this.CarPicsSpinners = function(config) {
         this.spinners = {};
         /**
-        * Helper function for after a get request has been made.  Maintains context for the async function call.
-        */
+         * Helper function for after a get request has been made.  Maintains context for the async function call.
+         */
         this.makeBoundGetRequest = function(config, thisObj) {
             return function() {
                 if(this.readyState==4 && this.status==200){
@@ -33,8 +33,8 @@ var CarPicsSpinnerAPI = (function() {
             }
         }
         /**
-        * Adds a spinner syncronously.  Uses a url array (array of json objects with field src)
-        */
+         * Adds a spinner syncronously.  Uses a url array (array of json objects with field src)
+         */
         this.addSpinner = function(config, urlArray) {
             this.spinners[config.divId] = {
                 spinner: new CarPicsSpinner(config, urlArray),
@@ -42,8 +42,8 @@ var CarPicsSpinnerAPI = (function() {
             };
         }
         /**
-        * Asyncronously makes a spinner from configured URL.
-        */
+         * Asyncronously makes a spinner from configured URL.
+         */
         this.makeSpinner = function(config) {
             this.spinners[config.divId] = {
                 spinStatus: false,
@@ -55,16 +55,16 @@ var CarPicsSpinnerAPI = (function() {
             xhttp.send();
         }
         /*
-        * For each configuration in the constructor, make a new spinner object in this scope, asyncronously.
-        */
+         * For each configuration in the constructor, make a new spinner object in this scope, asyncronously.
+         */
         for (var i = 0; i < config.spinners.length; i++) {
             this.makeSpinner(config.spinners[i]);
         }
     }
 
     /*
-    * Spinner class.  One spinner div will correspond to one CarPicsSpinner. 
-    */
+     * Spinner class.  One spinner div will correspond to one CarPicsSpinner. 
+     */
     this.CarPicsSpinner = function(config, data) {
         this.StartTime = Date.now();
         this.connectionsFinished = 0;
@@ -104,12 +104,12 @@ var CarPicsSpinnerAPI = (function() {
             this.loadSpinner();
         }
         /*
-        * Chooses the next image to load by halfing the distance from the current cursor to the next cursor.
-        * If no images need to load, move the loadcursor forward one until cursor has moved n times or has found
-        * an image that needs to load.
-        * When an image is found that needs to load, load that image with addImageAtCursor.
-        * If no image is found, exit successfully - loaded completely.
-        */
+         * Chooses the next image to load by halfing the distance from the current cursor to the next cursor.
+         * If no images need to load, move the loadcursor forward one until cursor has moved n times or has found
+         * an image that needs to load.
+         * When an image is found that needs to load, load that image with addImageAtCursor.
+         * If no image is found, exit successfully - loaded completely.
+         */
         this.loadCyclic = function() {
             var thisIndex = this.LoadCursor.Index;
             var nextIndex = 0;
@@ -140,10 +140,10 @@ var CarPicsSpinnerAPI = (function() {
             return complete;
         }
         /*
-        * Secondary mode, not implemented in div based configurations yet, selects next image to load by
-        * propagating linearly from starting location on both the left and right.  
-        * If no image is found that needs to load, exit successfully.  Else, load that image using addImageAtCursor
-        */
+         * Secondary mode, not implemented in div based configurations yet, selects next image to load by
+         * propagating linearly from starting location on both the left and right.  
+         * If no image is found that needs to load, exit successfully.  Else, load that image using addImageAtCursor
+         */
         this.loadLinear = function() {
             var nextIndex = 0;
             if (this.LoadCursor.Index - this.LoadCursor.NextImage.Index === 1) {
@@ -167,8 +167,8 @@ var CarPicsSpinnerAPI = (function() {
             return false;
         }
         /*
-        * Helper function to call the loader, to load the next image.
-        */
+         * Helper function to call the loader, to load the next image.
+         */
         this.loadNextImage = function() {
             if (typeof this.LinearReference == "undefined") {
                 var complete = this.loadCyclic();
@@ -176,13 +176,13 @@ var CarPicsSpinnerAPI = (function() {
                 var complete = this.loadLinear();
             }
             if (complete) {
-                this.connectionsFinished ++ ;
+                this.connectionsFinished++;
                 this.onAllLoaded();
             }
         }
         /*
-        * Calls all images that were added to the AllLoadedFunctions list (essentially onReady list).
-        */
+         * Calls all images that were added to the AllLoadedFunctions list (essentially onReady list).
+         */
         this.onAllLoaded = function() {
             for (var i = 0; i < this.AllLoadedFunctions.length; i++) {
                 if (typeof this.AllLoadedFunctions[i] == "function") {
@@ -199,9 +199,9 @@ var CarPicsSpinnerAPI = (function() {
             }
         }
         /*
-        * Adds an image to the cyclic linked list, and triggers that image to load by creating the image HTML element.
-        * Adds callback to that image being loaded - when it loads it will load the next image.
-        */
+         * Adds an image to the cyclic linked list, and triggers that image to load by creating the image HTML element.
+         * Adds callback to that image being loaded - when it loads it will load the next image.
+         */
         this.addImageAtCursor = function(nextIndex) {
             nextNext = this.LoadCursor.NextImage;
             this.LoadCursor.NextImage = new CarPicsImage(this.data[nextIndex], nextIndex, this.divId, this.getNextImage(this));
@@ -217,8 +217,8 @@ var CarPicsSpinnerAPI = (function() {
             return;
         }
         /*
-        * Helper function to maintain scope.
-        */
+         * Helper function to maintain scope.
+         */
         this.getNextImage = function(thisObj) {
             return function() {
                 thisObj.loadNextImage();
@@ -242,14 +242,14 @@ var CarPicsSpinnerAPI = (function() {
             }
         }
         /*
-        * Function to control which image is being displayed.  If called (under correct circumstances)
-        * It will advance the view cursor (CurrentImage) by one in the chosen direction.  If spinstatus
-        * is set false and givenDirection is undefied, it means that the call is an autospin call, but autospin
-        * is currently disabled (zoomed or manually turning).  Exit.
-        * If direciton is not 1,-1, misconfigured.  Exit.
-        * If no other images are ready to display, Exit.
-        * Else, display the next image.
-        */
+         * Function to control which image is being displayed.  If called (under correct circumstances)
+         * It will advance the view cursor (CurrentImage) by one in the chosen direction.  If spinstatus
+         * is set false and givenDirection is undefied, it means that the call is an autospin call, but autospin
+         * is currently disabled (zoomed or manually turning).  Exit.
+         * If direciton is not 1,-1, misconfigured.  Exit.
+         * If no other images are ready to display, Exit.
+         * Else, display the next image.
+         */
         this.displayNextImage = function(givenDirection) {
             var direction;
             var autospin;
@@ -341,11 +341,15 @@ var CarPicsSpinnerAPI = (function() {
                     if (thisObj.zoomed || baseEvent.button === 2) {
                         return;
                     }
-                    if(thisObj.interacted){
-                        CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
-                        thisObj.interacted=true;
+                    if (thisObj.interacted) {
+                        CarPicsGoogleAnalytics('send', 'pageview', {
+                            'dimension1': 'Click'
+                        });
+                        thisObj.interacted = true;
                     }
-                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
+                    CarPicsGoogleAnalytics('send', 'pageview', {
+                        'dimension1': 'Click'
+                    });
                     thisObj.spinStatus = false;
                     thisObj.turnStatus = true;
                     thisObj.mouseXPosition = baseEvent.pageX;
@@ -361,7 +365,9 @@ var CarPicsSpinnerAPI = (function() {
             */
             document.getElementById(this.divId).addEventListener("dblclick", (function(thisObj) {
                 return function(baseEvent) {
-                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Doubleclick'});
+                    CarPicsGoogleAnalytics('send', 'pageview', {
+                        'dimension2': 'Doubleclick'
+                    });
                     baseEvent.preventDefault();
                     var releaseMouse = thisObj.zoomToggle(baseEvent);
                     if (thisObj.zoomed === true) {
@@ -420,7 +426,7 @@ var CarPicsSpinnerAPI = (function() {
                             thisObj.displayNextImage(-1);
                             thisObj.mouseYPosition = currentYPosition;
                             thisObj.mouseXPosition = thisObj.mouseXPosition + thisObj.spinSensitivity;
-                        } 
+                        }
                     }
                 }
             })(this));
@@ -463,11 +469,15 @@ var CarPicsSpinnerAPI = (function() {
                     if (thisObj.zoomed) {
                         return;
                     }
-                    if(thisObj.interacted){
-                        CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Touchstart'});
-                        thisObj.interacted=true;
+                    if (thisObj.interacted) {
+                        CarPicsGoogleAnalytics('send', 'pageview', {
+                            'dimension1': 'Touchstart'
+                        });
+                        thisObj.interacted = true;
                     }
-                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Touchstart'});
+                    CarPicsGoogleAnalytics('send', 'pageview', {
+                        'dimension2': 'Touchstart'
+                    });
                     thisObj.spinStatus = false;
                     thisObj.turnStatus = true;
                     var touch = event.targetTouches[0] || event.changedTouches[0];
@@ -497,7 +507,7 @@ var CarPicsSpinnerAPI = (function() {
                                         thisInternal.displayNextImage(1);
                                         thisInternal.mouseYPosition = currentYPosition;
                                         thisInternal.mouseXPosition = thisObj.mouseXPosition - thisObj.spinSensitivity;
-                                    } 
+                                    }
                                     while (currentXPosition - thisInternal.mouseXPosition > thisInternal.spinSensitivity) {
                                         thisInternal.mouseYPosition = currentYPosition;
                                         thisInternal.mouseXPosition = thisObj.mouseXPosition + thisObj.spinSensitivity;
@@ -533,8 +543,8 @@ var CarPicsSpinnerAPI = (function() {
             })(this));
         }
         /*
-        * Default spinner styles to prevent images overflowing, and to show grab hand.
-        */
+         * Default spinner styles to prevent images overflowing, and to show grab hand.
+         */
         this.setDefaultSpinnerStyles = function() {
             this.spinnerDiv.style.cursor = "grab";
             this.spinnerDiv.style.cursor = "-webkit-grab";
@@ -586,9 +596,9 @@ var CarPicsSpinnerAPI = (function() {
         }
     }
     /*
-    * CarPicsImage is a wrapper on functionality for the image container element.  
-    * Contains image readiness information as well.
-    */
+     * CarPicsImage is a wrapper on functionality for the image container element.  
+     * Contains image readiness information as well.
+     */
     this.CarPicsImage = function(source, index, div, callback) {
         /*
         * Controls CSS to properly allow zoom functionality.
@@ -604,8 +614,8 @@ var CarPicsSpinnerAPI = (function() {
             this.move(clientX,clientY);
         }
         /*
-        * Resets element to default after zoom end.
-        */
+         * Resets element to default after zoom end.
+         */
         this.unzoom = function() {
             this.HTMLElement.style.maxHeight = "100%";
             this.HTMLElement.style.maxWidth = "100%";
@@ -615,8 +625,8 @@ var CarPicsSpinnerAPI = (function() {
             this.HTMLElement.style.top = 0 + 'px';
         }
         /*
-        * Allows moving view within zoomed element.
-        */
+         * Allows moving view within zoomed element.
+         */
         this.move = function(mouseX, mouseY) {
             var offset = this.HTMLElement.parentElement.getBoundingClientRect();
             var mouseXOffset;
@@ -631,8 +641,8 @@ var CarPicsSpinnerAPI = (function() {
             this.HTMLElement.style.top = mouseYOffset / document.documentElement.clientWidth * 100 + 'vw';
         }
         /*
-        * Default Image styles and sets up transitions which make movements nicer.
-        */
+         * Default Image styles and sets up transitions which make movements nicer.
+         */
         this.setDefaultImageStyles = function() {
             this.HTMLElement.style.position = "relative";
             this.HTMLElement.style.maxHeight = "100%";
