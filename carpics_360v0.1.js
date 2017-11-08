@@ -25,9 +25,11 @@ var CarPicsSpinnerAPI = (function() {
          * Helper function for after a get request has been made.  Maintains context for the async function call.
          */
         this.makeBoundGetRequest = function(config, thisObj) {
-            return function(data) {
-                thisObj.spinners[config.divId].spinner = new CarPicsSpinner(config, data);
-                thisObj.spinners[config.divId].spinStatus = false;
+            return function() {
+                if(this.readyState==4 && this.status==200){
+                    thisObj.spinners[config.divId].spinner = new CarPicsSpinner(config, JSON.parse(this.responseText));
+                    thisObj.spinners[config.divId].spinStatus = false;
+                }
             }
         }
         /**
@@ -47,7 +49,10 @@ var CarPicsSpinnerAPI = (function() {
                 spinStatus: false,
                 spinner: {}
             }
-            $.get(config.sourceURL, {}, this.makeBoundGetRequest(config, this), "json");
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange=this.makeBoundGetRequest(config, this);
+            xhttp.open("GET",config.sourceURL);
+            xhttp.send();
         }
         /*
          * For each configuration in the constructor, make a new spinner object in this scope, asyncronously.
@@ -64,10 +69,9 @@ var CarPicsSpinnerAPI = (function() {
         this.StartTime = Date.now();
         this.connectionsFinished = 0;
         this.divId = config.divId;
-        if (data === null || typeof data == "undefined" || data.length == 0) {
-            var element = document.getElementById(this.divId);
-            element.style.backgroundImage = "url('http://resources.carpics2p0.com/Rotation/checkerboard-backgrounds-wallpapers.jpg')"
-            element.style.repeat = "repeat"
+        this.spinnerDiv = document.getElementById(this.divId);
+        if(data === null || typeof data == "undefined" || data.length==0){
+            this.insertPlaceholder();
             return;
         }
         this.data = data;
@@ -89,44 +93,15 @@ var CarPicsSpinnerAPI = (function() {
         }
         this.spinStatus = this.spinDefault;
         this.mouseXPosition;
-        this.mouseYPosition;
+        this.mouseYPosition;  
         if (typeof config.overrideSize !== "undefined" &&
             typeof config.overrideSize.width &&
             typeof config.overrideSize.height) {
-            var element = document.getElementById(this.divId);
-            element.style.width = config.overrideSize.width;
-            element.style.height = config.overrideSize.height;
+            this.spinnerDiv.style.width = config.overrideSize.width;
+            this.spinnerDiv.style.height = config.overrideSize.height;
         }
-        this.spinnerDiv = document.getElementById(this.divId);
-        if (typeof config.overlaySource != "undefined" && config.overlaySource !== null) {
-            this.spinnerOverlay = document.createElement("div");
-
-            this.spinnerOverlay.style.height = "100%";
-            this.spinnerOverlay.style.width = "100%";
-            this.spinnerOverlay.style.zIndex = 100;
-            this.spinnerOverlay.style.position = "absolute";
-            var img = new Image();
-            img.src = config.overlaySource;
-            img.style.width = "80%";
-            img.style.height = "auto";
-            img.style.position = "absolute";
-            img.style.margin = "auto";
-            img.style.top = 0;
-            img.style.right = 0;
-            img.style.bottom = 0;
-            img.style.left = 0;
-            this.spinnerOverlay.onmouseover = (function(div) {
-                return function(event) {
-                    div.style.visibility = "hidden";
-                }
-            })(img);
-            this.spinnerOverlay.onmouseout = (function(div) {
-                return function(event) {
-                    div.style.visibility = "";
-                }
-            })(img);
-            this.spinnerOverlay.appendChild(img);
-            this.spinnerDiv.appendChild(this.spinnerOverlay);
+        if(typeof config.overlaySource != "undefined" && config.overlaySource !== null) {
+            this.loadSpinner();
         }
         /*
          * Chooses the next image to load by halfing the distance from the current cursor to the next cursor.
@@ -250,9 +225,9 @@ var CarPicsSpinnerAPI = (function() {
             }
         }
         /*
-         * Toggle event has occurred.  Toggle whether zoom is on or off.
-         */
-        this.zoomToggle = function(baseEvent, tapholdCoordinates) {
+        * Toggle event has occurred.  Toggle whether zoom is on or off.
+        */
+        this.zoomToggle = function(baseEvent) {
             if (this.zoomed == true) {
                 this.CurrentImage.unzoom();
                 this.spinStatus = false;
@@ -262,7 +237,7 @@ var CarPicsSpinnerAPI = (function() {
                 this.pauseMouseTime = Date.now() + 500;
                 this.zoomed = true;
                 this.spinStatus = false;
-                this.CurrentImage.zoom(baseEvent, tapholdCoordinates);
+                this.CurrentImage.zoom(baseEvent);
                 return false;
             }
         }
@@ -318,14 +293,48 @@ var CarPicsSpinnerAPI = (function() {
             this.CurrentImage.HTMLElement.style.display = "block";
             previous.HTMLElement.style.display = "none";
         }
+        this.insertPlaceholder = function(){
+            var element = document.getElementById(this.divId);
+            element.style.backgroundImage="url('http://resources.carpics2p0.com/Rotation/checkerboard-backgrounds-wallpapers.jpg')"
+            element.style.repeat="repeat"
+        }
+        this.loadSpinner = function(){
+            this.spinnerOverlay = document.createElement("div");
+            this.spinnerOverlay.style.height="100%";
+            this.spinnerOverlay.style.width="100%";
+            this.spinnerOverlay.style.zIndex=100;
+            this.spinnerOverlay.style.position="absolute";
+            var img = new Image();
+            img.src = config.overlaySource ;
+            img.style.width="80%";
+            img.style.height="auto";
+            img.style.position="absolute";
+            img.style.margin="auto";
+            img.style.top=0;
+            img.style.right=0;
+            img.style.bottom=0;
+            img.style.left=0;
+            this.spinnerOverlay.onmouseover = (function(div){
+                return function(event){
+                    div.style.visibility="hidden";
+                }
+            })(img);
+            this.spinnerOverlay.onmouseout = (function(div){
+                return function(event){
+                    div.style.visibility="";
+                }
+            })(img);
+            this.spinnerOverlay.appendChild(img);
+            this.spinnerDiv.appendChild(this.spinnerOverlay);
+        }
 
         // Mouse events:
         if (!this.mouseDisabled) {
 
             /*
-             * Mousedown event starts manual rotation (drag spin)
-             */
-            $(document).on("mousedown", "#" + this.divId, (function(thisObj) {
+            * Mousedown event starts manual rotation (drag spin)
+            */
+            document.getElementById(this.divId).addEventListener("mousedown", (function(thisObj) {
                 return function(baseEvent) {
                     baseEvent.preventDefault();
                     var thisTouch = Date.now();
@@ -352,9 +361,9 @@ var CarPicsSpinnerAPI = (function() {
             })(this));
 
             /*
-             * Doubleclick triggers desktop zoom event.
-             */
-            $(document).on("dblclick", "#" + this.divId, (function(thisObj) {
+            * Doubleclick triggers desktop zoom event.
+            */
+            document.getElementById(this.divId).addEventListener("dblclick", (function(thisObj) {
                 return function(baseEvent) {
                     CarPicsGoogleAnalytics('send', 'pageview', {
                         'dimension2': 'Doubleclick'
@@ -373,42 +382,9 @@ var CarPicsSpinnerAPI = (function() {
             })(this));
 
             /*
-             * Taphold event triggers both mobile and desktop zoom events.
-             */
-            $(document).on("taphold", "#" + this.divId, (function(thisObj) {
-                return function(baseEvent) {
-                    if (thisObj.turning == true) {
-                        return;
-                    }
-                    if (thisObj.interacted) {
-                        CarPicsGoogleAnalytics('send', 'pageview', {
-                            'dimension1': 'Taphold'
-                        });
-                        thisObj.interacted = true;
-                    }
-                    CarPicsGoogleAnalytics('send', 'pageview', {
-                        'dimension2': 'Taphold'
-                    });
-                    baseEvent.preventDefault();
-                    var releaseMouse = thisObj.zoomToggle(baseEvent, {
-                        "x": thisObj.mouseXPosition,
-                        "y": thisObj.mouseYPosition
-                    });
-                    if (thisObj.zoomed === true) {
-                        thisObj.spinStatus = false;
-                        thisObj.turnStatus = false;
-                    } else {
-                        thisObj.spinStatus = thisObj.spinDefault;
-                        thisObj.turnStatus = false;
-                    }
-
-                }
-            })(this));
-
-            /*
-             * Mouseup event ends drag status.
-             */
-            $(document).on("mouseup", (function(thisObj) {
+            * Mouseup event ends drag status.
+            */
+            document.getElementById(this.divId).addEventListener("mouseup", (function(thisObj) {
                 return function(baseEvent) {
                     baseEvent.preventDefault();
                     if (thisObj.zoomed || thisObj.mouseDisabled) {
@@ -424,9 +400,9 @@ var CarPicsSpinnerAPI = (function() {
             })(this));
 
             /*
-             * Mousemove moves zoom viewport or allows drag spin, depending on current status.
-             */
-            $(document).on("mousemove", (function(thisObj) {
+            * Mousemove moves zoom viewport or allows drag spin, depending on current status.
+            */
+            document.getElementById(this.divId).addEventListener("mousemove", (function(thisObj) {
                 return function(baseEvent) {
                     if (thisObj.pauseMouseTime > Date.now()) {
                         return;
@@ -439,7 +415,7 @@ var CarPicsSpinnerAPI = (function() {
                     if (thisObj.zoomed == true) {
                         thisObj.CurrentImage.move(currentXPosition, currentYPosition);
                     } else {
-                        while (thisObj.mouseXPosition - currentXPosition > thisObj.spinSensitivity) {
+                        while (thisObj.mouseXPosition - currentXPosition > thisObj.spinSensitivity){
                             thisObj.turning = true;
                             thisObj.displayNextImage(1);
                             thisObj.mouseYPosition = currentYPosition;
@@ -455,13 +431,38 @@ var CarPicsSpinnerAPI = (function() {
                 }
             })(this));
 
+
             /*
-             * Touchstart event starts manual rotation (drag spin), also needed to bind 
-             * move events to prevent passive listener warnings and failure of touchmove events.
-             * Also needed to capture position of touchhold event for zooming.
-             */
-            $("#" + this.divId).bind('touchstart', (function(thisObj) {
+            * Touchstart event starts manual rotation (drag spin), also needed to bind 
+            * move events to prevent passive listener warnings and failure of touchmove events.
+            * Also needed to capture position of touchhold event for zooming.  Also sets up
+            * the pseudo-event of taphold.
+            */
+            var originalEvent;
+            document.getElementById(this.divId).addEventListener("touchstart", (function(thisObj) {
                 return function(event) {
+                    pressTimer=setTimeout((function(thisObj) {
+                        return function() {
+                            if (thisObj.turning == true) {
+                                return;
+                            }
+                            if(thisObj.interacted){
+                                CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Taphold'});
+                                thisObj.interacted=true;
+                            }
+                            CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Taphold'});
+                            event.preventDefault();
+                            var releaseMouse = thisObj.zoomToggle(event);
+                            if (thisObj.zoomed === true) {
+                                thisObj.spinStatus = false;
+                                thisObj.turnStatus = false;
+                            } else {
+                                thisObj.spinStatus = thisObj.spinDefault;
+                                thisObj.turnStatus = false;
+                            }
+
+                        }
+                    })(thisObj), 300)
                     event.preventDefault();
                     event.returnValue = false;
                     var thisTouch = Date.now();
@@ -479,13 +480,13 @@ var CarPicsSpinnerAPI = (function() {
                     });
                     thisObj.spinStatus = false;
                     thisObj.turnStatus = true;
-                    var touch = event.originalEvent.touches[0] || event.originalEvent.changedTouches[0];
+                    var touch = event.targetTouches[0] || event.changedTouches[0];
                     thisObj.mouseXPosition = touch.pageX
                     thisObj.mouseYPosition = touch.pageY;
                     /*
-                     * Touchmove triggers drag spin in mobile.  Does not trigger zoom move.
-                     */
-                    $("#" + thisObj.divId).bind('touchmove', (
+                    * Touchmove triggers drag spin in mobile.  Does not trigger zoom move.
+                    */
+                    document.getElementById(thisObj.divId).addEventListener('touchmove', (
                         function(thisInternal) {
                             return function(event1) {
                                 event1.preventDefault();
@@ -495,7 +496,7 @@ var CarPicsSpinnerAPI = (function() {
                                 if (thisInternal.turnStatus !== true && thisInternal.zoomed !== true) {
                                     return;
                                 }
-                                var touch = event1.originalEvent.touches[0] || event1.originalEvent.changedTouches[0]
+                                var touch = event1.targetTouches[0] || event1.targetTouches[0]
                                 var currentXPosition = touch.pageX;
                                 var currentYPosition = touch.pageY;
                                 if (thisInternal.zoomed == true) {
@@ -522,20 +523,22 @@ var CarPicsSpinnerAPI = (function() {
             })(this));
 
             /*
-             * Touchend event ends manual drag.
-             */
-            $(document).on('touchend', "#" + this.divId, (function(thisObj) {
+            * Touchend event ends manual drag - also clears the detector for the taphold pseudo-event
+            */
+            var pressTimer;
+            document.getElementById(this.divId).addEventListener("touchend", (function(thisObj) {
                 return function(event) {
                     if (thisObj.mouseDisabled) {
                         return;
                     }
+                    clearTimeout(pressTimer)
                     thisObj.spinStatus = thisObj.spinDefault;
                     thisObj.turnStatus = false;
                     thisObj.turning = false;
                     thisObj.spinnerDiv.style.cursor = "-webkit-grab";
                     thisObj.spinnerDiv.style.cursor = "grab";
                     thisObj.spinnerDiv.style.cursor = "-moz-grab";
-                    $("#" + thisObj.divId).unbind('touchmove', function(event1) {});
+                    document.getElementById(this.divId).addEventListener("touchmove", function(event1) {});
                 }
             })(this));
         }
@@ -597,25 +600,18 @@ var CarPicsSpinnerAPI = (function() {
      * Contains image readiness information as well.
      */
     this.CarPicsImage = function(source, index, div, callback) {
-        var indicateReady = (function(thisObj, index) {
-            return function(ready) {
-                if (ready) {
-                    thisObj.isReady = true;
-                }
-            }
-        })(this, index);
         /*
-         * Controls CSS to properly allow zoom functionality.
-         */
-        this.zoom = function(baseEvent, tapholdCoordinates) {
+        * Controls CSS to properly allow zoom functionality.
+        */
+        this.zoom = function(baseEvent) {
             var offset = this.HTMLElement.getBoundingClientRect();
             this.HTMLElement.style.maxHeight = "200%";
             this.HTMLElement.style.maxWidth = "200%";
             this.HTMLElement.style.height = "200%";
             this.HTMLElement.style.width = "200%";
-            var clientX = baseEvent.type == "taphold" ? tapholdCoordinates.x - window.scrollX : baseEvent.clientX;
-            var clientY = baseEvent.type == "taphold" ? tapholdCoordinates.y - window.scrollY : baseEvent.clientY;
-            this.move(clientX, clientY);
+            var clientX = baseEvent.type == "dblclick" ? baseEvent.pageX - window.scrollX : baseEvent.targetTouches[0].clientX;
+            var clientY = baseEvent.type == "dblclick" ? baseEvent.pageY - window.scrollY : baseEvent.targetTouches[0].clientY;
+            this.move(clientX,clientY);
         }
         /*
          * Resets element to default after zoom end.
@@ -675,6 +671,13 @@ var CarPicsSpinnerAPI = (function() {
                 return false
             };
         }
+        var indicateReady = (function(thisObj, index) {
+            return function(ready) {
+                if(ready){
+                    thisObj.isReady = true;
+                } 
+            }
+        })(this, index);
         this.imageLoadStart = Date.now();
         this.NextImage = this;
         this.PreviousImage = this;
@@ -689,10 +692,10 @@ var CarPicsSpinnerAPI = (function() {
         this.imgElement.setAttribute("src", source.src);
         this.HTMLElement.setAttribute("id", this.elementId);
         this.imgElement.addEventListener("load", function() {
-            callback();
-            indicateReady(true)
+                callback();
+                indicateReady(true)
         });
-        this.imgElement.addEventListener("error", function() {
+        this.imgElement.addEventListener("error", function(){
             callback()
             indicateReady(false);
         });
@@ -701,32 +704,40 @@ var CarPicsSpinnerAPI = (function() {
 })();
 
 /**
- * Closure that iterates over all elements with classname of "carPicsSpinner" and sets up a spinner in that div.
- */
-$(document).ready(function() {
-    var spinners = [];
-    var CarpicsDivs = document.getElementsByClassName("carPicsSpinner");
-    for (var i = 0; i < CarpicsDivs.length; i++) {
-        var div = CarpicsDivs[i];
-        spinners.push({
-            numberOfConnections: div.getAttribute("numberOfConnections"),
-            autospin: div.getAttribute("autospin"),
-            autospinDirection: div.getAttribute("autospinDirection") == "left" ? -1 : 1,
-            spinOnLoad: div.getAttribute("spinOnLoad"),
-            divId: div.getAttribute("id"),
-            sourceURL: "http://api.carpics2p0.com/rest/spinner?dealer=" + div.getAttribute("dealer") +
-                "&vin=" + div.getAttribute("vin"),
-            autospinSleep: div.getAttribute("autospinSleep"),
-            spinSensitivity: div.getAttribute("spinSensitivity"),
-            disableMouse: div.getAttribute("disableMouse"),
-            overrideSize: {
-                overrideWidth: div.getAttribute("overrideWidth"),
-                overrideHeight: div.getAttribute("overrideHeight")
-            },
-            overlaySource: div.getAttribute("overlaySource")
+* Closure that iterates over all elements with classname of "carPicsSpinner" and sets up a spinner in that div.
+*/
+(function(){
+    var callback =function() {
+        var spinners = [];
+        var CarpicsDivs = document.getElementsByClassName("carPicsSpinner");
+        for (var i = 0; i < CarpicsDivs.length; i++) {
+            var div = CarpicsDivs[i];
+            spinners.push({
+                numberOfConnections: div.getAttribute("numberOfConnections"),
+                autospin: div.getAttribute("autospin"),
+                autospinDirection: div.getAttribute("autospinDirection") == "left" ? -1 : 1,
+                spinOnLoad: div.getAttribute("spinOnLoad"),
+                divId: div.getAttribute("id"),
+                sourceURL: "http://feed.carpics2p0.com/rest/spinner/s3?dealer="+div.getAttribute("dealer")
+                +"&vin=" + div.getAttribute("vin"),
+                autospinSleep: div.getAttribute("autospinSleep"),
+                spinSensitivity: div.getAttribute("spinSensitivity"),
+                disableMouse: div.getAttribute("disableMouse"),
+                overrideSize: {
+                    overrideWidth: div.getAttribute("overrideWidth"),
+                    overrideHeight: div.getAttribute("overrideHeight")
+                },
+                overlaySource:div.getAttribute("overlaySource")
+            });
+        }
+        var Spinners = new CarPicsSpinnerAPI.CarPicsSpinners({
+            spinners: spinners
         });
     }
-    var Spinners = new CarPicsSpinnerAPI.CarPicsSpinners({
-        spinners: spinners
-    });
-});
+    if ( document.readyState === "complete" || 
+        (document.readyState !== "loading" && !document.documentElement.doScroll)) {
+      callback();
+    } else {
+      document.addEventListener("DOMContentLoaded", callback);
+    }
+})();
