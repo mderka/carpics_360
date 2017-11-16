@@ -2,14 +2,21 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
    <head>
       <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.css">
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-      <script src="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.8/esm/popper.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
       <title>Car Pics 2.0 - 360 photos</title>
+      
    </head>
    <body style="background: url();">
       <style>
          #frm2menu div:hover {
             color: #428bca !important;
+         }
+         body{
+          text-shadow: none !important;
          }
          h1 {
            font: bold 330%/100% "Lucida Grande";
@@ -28,17 +35,72 @@
          .displayStyle{
             touch-action: none; 
             background-color:#fff; 
-            width: 70%; 
             height: auto; 
-            max-height: 70vh;
             margin: auto;  
             border: 5px solid #fff;
          }
+
+         .buttonWrap{
+            position: absolute; 
+            top: 45%; 
+            right: 6px; 
+            z-index: 20;
+          }
+
+          .button-control{
+            padding: 2px 2px;
+              height: 30px !important;
+              width: 30px !important;
+              border: none;
+              opacity: 0.8;
+              border-radius: 4px !important;
+              background: #fff;
+              margin-bottom: 4px;
+              margin-top: 4px;
+              text-shadow: none !important;
+          }
+
+          .button-control:hover{
+            background-color: #333 !important;
+            color: #eaeaea !important;
+          }
+
+          .tooltip.top .tooltip-inner, 
+          .tooltip.right .tooltip-inner, 
+          .tooltip.bottom .tooltip-inner, 
+          .tooltip.left .tooltip-inner {
+            background-color: #EF255FAA;
+            color: #fff;
+            font-weight: 100;
+            letter-spacing: 1px;
+          }
+          .tooltip.top .tooltip-arrow{
+            border-top-color: #EF255FAA;
+          }
+          .tooltip.right .tooltip-arrow{
+            border-right-color: #EF255FAA;
+          }
+          .tooltip.bottom .tooltip-arrow{
+            border-bottom-color: #EF255FAA;
+          }
+          .tooltip.left .tooltip-arrow{
+            border-left-color: #EF255FAA;
+          }
       </style>
       <div style="height: 100vh; width: 100vw; background: url(../examples/background.png) no-repeat;background-size: 100% 100%; display: flex; align-items: center; justify-content: center;">
-         <div style="margin-top: 60px;">
-            <div id="georgecarmichael" class="carPicsSpinner displayStyle" vin="1" dealer="001">
+         <div style="width: 60vw;">
+            <div id="georgecarmichael" class="carPicsSpinner displayStyle" vin="1" dealer="001" style="position: relative; height: 40vw;">
+              <div class="buttonWrap">
+                <button class="button-control" id="zoom_in_button">
+                  <i class="material-icons">zoom_in</i>
+                </button>
+                <br>
+                <button class="button-control" id="zoom_out_button">
+                  <i class="material-icons">zoom_out</i>
+                </button>
+              </div>
             </div> 
+            
             <div style="text-align: center; color: #fff; text-shadow: none; margin-top: 0.5em;">
                <h1><span></span>CAR PICS 2.0 360</h1>
                <div style="font-size: 0.9em;">
@@ -47,6 +109,7 @@
             </div>
          </div>
       </div>
+
       <script type="text/javascript" src="../carpics_360v0.1.js" async="true"></script>
    </body>
 </html>

@@ -12,18 +12,20 @@ if(!window.DisableCarpicsAnalytics){
 } else {
     CarPicsGoogleAnalytics = function(){};
 }
+
 /*
- * Defines the CarPics Spinner API and exposes it to global scope.  Only reference in global scope is: CarPicsSpinnerAPI
- */
+* Defines the CarPics Spinner API and exposes it to global scope.  Only reference in global scope is: CarPicsSpinnerAPI
+*/
 var CarPicsSpinnerAPI = (function() {
+    window.tryVar = 'hello there!';
     /** 
-     * Internal constructors for building spinners, including making spinners with an asynchronous get call. 
-     */
+    * Internal constructors for building spinners, including making spinners with an asynchronous get call. 
+    */
     this.CarPicsSpinners = function(config) {
         this.spinners = {};
         /**
-         * Helper function for after a get request has been made.  Maintains context for the async function call.
-         */
+        * Helper function for after a get request has been made.  Maintains context for the async function call.
+        */
         this.makeBoundGetRequest = function(config, thisObj) {
             return function() {
                 if(this.readyState==4 && this.status==200){
@@ -33,8 +35,8 @@ var CarPicsSpinnerAPI = (function() {
             }
         }
         /**
-         * Adds a spinner syncronously.  Uses a url array (array of json objects with field src)
-         */
+        * Adds a spinner syncronously.  Uses a url array (array of json objects with field src)
+        */
         this.addSpinner = function(config, urlArray) {
             this.spinners[config.divId] = {
                 spinner: new CarPicsSpinner(config, urlArray),
@@ -42,8 +44,8 @@ var CarPicsSpinnerAPI = (function() {
             };
         }
         /**
-         * Asyncronously makes a spinner from configured URL.
-         */
+        * Asyncronously makes a spinner from configured URL.
+        */
         this.makeSpinner = function(config) {
             this.spinners[config.divId] = {
                 spinStatus: false,
@@ -55,16 +57,16 @@ var CarPicsSpinnerAPI = (function() {
             xhttp.send();
         }
         /*
-         * For each configuration in the constructor, make a new spinner object in this scope, asyncronously.
-         */
+        * For each configuration in the constructor, make a new spinner object in this scope, asyncronously.
+        */
         for (var i = 0; i < config.spinners.length; i++) {
             this.makeSpinner(config.spinners[i]);
         }
     }
 
     /*
-     * Spinner class.  One spinner div will correspond to one CarPicsSpinner. 
-     */
+    * Spinner class.  One spinner div will correspond to one CarPicsSpinner. 
+    */
     this.CarPicsSpinner = function(config, data) {
         this.StartTime = Date.now();
         this.connectionsFinished = 0;
@@ -75,11 +77,13 @@ var CarPicsSpinnerAPI = (function() {
             return;
         }
         this.data = data;
+        window.sourceFromAPI = data;
         this.numberOfConnections = config.numberOfConnections > 0 ? config.numberOfConnections : 4;
         this.AllLoded = false;
         this.AllLoadedFunctions = [];
         this.turnStatus = false;
         this.turning = false;
+        this.multiZoom=false;
         this.lastTouch = 0;
         this.autospinSleep = config.autospinSleep > 0 ? config.autospinSleep : 100;
         this.mouseDisabled = config.disableMouse || false;
@@ -104,12 +108,12 @@ var CarPicsSpinnerAPI = (function() {
             this.loadSpinner();
         }
         /*
-         * Chooses the next image to load by halfing the distance from the current cursor to the next cursor.
-         * If no images need to load, move the loadcursor forward one until cursor has moved n times or has found
-         * an image that needs to load.
-         * When an image is found that needs to load, load that image with addImageAtCursor.
-         * If no image is found, exit successfully - loaded completely.
-         */
+        * Chooses the next image to load by halfing the distance from the current cursor to the next cursor.
+        * If no images need to load, move the loadcursor forward one until cursor has moved n times or has found
+        * an image that needs to load.
+        * When an image is found that needs to load, load that image with addImageAtCursor.
+        * If no image is found, exit successfully - loaded completely.
+        */
         this.loadCyclic = function() {
             var thisIndex = this.LoadCursor.Index;
             var nextIndex = 0;
@@ -140,10 +144,10 @@ var CarPicsSpinnerAPI = (function() {
             return complete;
         }
         /*
-         * Secondary mode, not implemented in div based configurations yet, selects next image to load by
-         * propagating linearly from starting location on both the left and right.  
-         * If no image is found that needs to load, exit successfully.  Else, load that image using addImageAtCursor
-         */
+        * Secondary mode, not implemented in div based configurations yet, selects next image to load by
+        * propagating linearly from starting location on both the left and right.  
+        * If no image is found that needs to load, exit successfully.  Else, load that image using addImageAtCursor
+        */
         this.loadLinear = function() {
             var nextIndex = 0;
             if (this.LoadCursor.Index - this.LoadCursor.NextImage.Index === 1) {
@@ -167,8 +171,8 @@ var CarPicsSpinnerAPI = (function() {
             return false;
         }
         /*
-         * Helper function to call the loader, to load the next image.
-         */
+        * Helper function to call the loader, to load the next image.
+        */
         this.loadNextImage = function() {
             if (typeof this.LinearReference == "undefined") {
                 var complete = this.loadCyclic();
@@ -176,13 +180,13 @@ var CarPicsSpinnerAPI = (function() {
                 var complete = this.loadLinear();
             }
             if (complete) {
-                this.connectionsFinished++;
+                this.connectionsFinished ++ ;
                 this.onAllLoaded();
             }
         }
         /*
-         * Calls all images that were added to the AllLoadedFunctions list (essentially onReady list).
-         */
+        * Calls all images that were added to the AllLoadedFunctions list (essentially onReady list).
+        */
         this.onAllLoaded = function() {
             for (var i = 0; i < this.AllLoadedFunctions.length; i++) {
                 if (typeof this.AllLoadedFunctions[i] == "function") {
@@ -199,9 +203,9 @@ var CarPicsSpinnerAPI = (function() {
             }
         }
         /*
-         * Adds an image to the cyclic linked list, and triggers that image to load by creating the image HTML element.
-         * Adds callback to that image being loaded - when it loads it will load the next image.
-         */
+        * Adds an image to the cyclic linked list, and triggers that image to load by creating the image HTML element.
+        * Adds callback to that image being loaded - when it loads it will load the next image.
+        */
         this.addImageAtCursor = function(nextIndex) {
             nextNext = this.LoadCursor.NextImage;
             this.LoadCursor.NextImage = new CarPicsImage(this.data[nextIndex], nextIndex, this.divId, this.getNextImage(this));
@@ -217,8 +221,8 @@ var CarPicsSpinnerAPI = (function() {
             return;
         }
         /*
-         * Helper function to maintain scope.
-         */
+        * Helper function to maintain scope.
+        */
         this.getNextImage = function(thisObj) {
             return function() {
                 thisObj.loadNextImage();
@@ -228,7 +232,7 @@ var CarPicsSpinnerAPI = (function() {
         * Toggle event has occurred.  Toggle whether zoom is on or off.
         */
         this.zoomToggle = function(baseEvent) {
-            if (this.zoomed == true) {
+            if (this.zoomed == true && !this.multiZoom) {
                 this.CurrentImage.unzoom();
                 this.spinStatus = false;
                 this.zoomed = false;
@@ -242,14 +246,14 @@ var CarPicsSpinnerAPI = (function() {
             }
         }
         /*
-         * Function to control which image is being displayed.  If called (under correct circumstances)
-         * It will advance the view cursor (CurrentImage) by one in the chosen direction.  If spinstatus
-         * is set false and givenDirection is undefied, it means that the call is an autospin call, but autospin
-         * is currently disabled (zoomed or manually turning).  Exit.
-         * If direciton is not 1,-1, misconfigured.  Exit.
-         * If no other images are ready to display, Exit.
-         * Else, display the next image.
-         */
+        * Function to control which image is being displayed.  If called (under correct circumstances)
+        * It will advance the view cursor (CurrentImage) by one in the chosen direction.  If spinstatus
+        * is set false and givenDirection is undefied, it means that the call is an autospin call, but autospin
+        * is currently disabled (zoomed or manually turning).  Exit.
+        * If direciton is not 1,-1, misconfigured.  Exit.
+        * If no other images are ready to display, Exit.
+        * Else, display the next image.
+        */
         this.displayNextImage = function(givenDirection) {
             var direction;
             var autospin;
@@ -330,7 +334,6 @@ var CarPicsSpinnerAPI = (function() {
 
         // Mouse events:
         if (!this.mouseDisabled) {
-
             /*
             * Mousedown event starts manual rotation (drag spin)
             */
@@ -341,15 +344,11 @@ var CarPicsSpinnerAPI = (function() {
                     if (thisObj.zoomed || baseEvent.button === 2) {
                         return;
                     }
-                    if (thisObj.interacted) {
-                        CarPicsGoogleAnalytics('send', 'pageview', {
-                            'dimension1': 'Click'
-                        });
-                        thisObj.interacted = true;
+                    if(thisObj.interacted){
+                        CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
+                        thisObj.interacted=true;
                     }
-                    CarPicsGoogleAnalytics('send', 'pageview', {
-                        'dimension1': 'Click'
-                    });
+                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
                     thisObj.spinStatus = false;
                     thisObj.turnStatus = true;
                     thisObj.mouseXPosition = baseEvent.pageX;
@@ -365,9 +364,47 @@ var CarPicsSpinnerAPI = (function() {
             */
             document.getElementById(this.divId).addEventListener("dblclick", (function(thisObj) {
                 return function(baseEvent) {
-                    CarPicsGoogleAnalytics('send', 'pageview', {
-                        'dimension2': 'Doubleclick'
-                    });
+                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Doubleclick'});
+                    baseEvent.preventDefault();
+                    var releaseMouse = thisObj.zoomToggle(baseEvent);
+                    if (thisObj.zoomed === true) {
+                        thisObj.spinStatus = false;
+                        thisObj.turnStatus = false;
+                    } else {
+                        thisObj.spinStatus = thisObj.spinDefault;
+                        thisObj.turnStatus = false;
+                    }
+
+                }
+            })(this));
+
+            /*
+            * Clicking on zoomin button triggers desktop zoom in event.
+            */
+            document.getElementById("zoom_in_button").addEventListener("click", (function(thisObj) {
+                return function(baseEvent) {
+                    baseEvent.stopPropagation();
+                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
+                    baseEvent.preventDefault();
+                    var releaseMouse = thisObj.zoomToggle(baseEvent);
+                    if (thisObj.zoomed === true) {
+                        thisObj.spinStatus = false;
+                        thisObj.turnStatus = false;
+                    } else {
+                        thisObj.spinStatus = thisObj.spinDefault;
+                        thisObj.turnStatus = false;
+                    }
+
+                }
+            })(this));
+
+            /*
+            * Clicking on zoomout button triggers desktop zoom out event.
+            */
+            document.getElementById("zoom_out_button").addEventListener("click", (function(thisObj) {
+                return function(baseEvent) {
+                    baseEvent.stopPropagation();
+                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
                     baseEvent.preventDefault();
                     var releaseMouse = thisObj.zoomToggle(baseEvent);
                     if (thisObj.zoomed === true) {
@@ -413,6 +450,9 @@ var CarPicsSpinnerAPI = (function() {
                     var currentXPosition = baseEvent.pageX;
                     var currentYPosition = baseEvent.pageY;
                     if (thisObj.zoomed == true) {
+                        if(thisObj.multiZoom){
+                            return;
+                        }
                         thisObj.CurrentImage.move(currentXPosition, currentYPosition);
                     } else {
                         while (thisObj.mouseXPosition - currentXPosition > thisObj.spinSensitivity){
@@ -426,7 +466,7 @@ var CarPicsSpinnerAPI = (function() {
                             thisObj.displayNextImage(-1);
                             thisObj.mouseYPosition = currentYPosition;
                             thisObj.mouseXPosition = thisObj.mouseXPosition + thisObj.spinSensitivity;
-                        }
+                        } 
                     }
                 }
             })(this));
@@ -469,15 +509,11 @@ var CarPicsSpinnerAPI = (function() {
                     if (thisObj.zoomed) {
                         return;
                     }
-                    if (thisObj.interacted) {
-                        CarPicsGoogleAnalytics('send', 'pageview', {
-                            'dimension1': 'Touchstart'
-                        });
-                        thisObj.interacted = true;
+                    if(thisObj.interacted){
+                        CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Touchstart'});
+                        thisObj.interacted=true;
                     }
-                    CarPicsGoogleAnalytics('send', 'pageview', {
-                        'dimension2': 'Touchstart'
-                    });
+                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Touchstart'});
                     thisObj.spinStatus = false;
                     thisObj.turnStatus = true;
                     var touch = event.targetTouches[0] || event.changedTouches[0];
@@ -507,7 +543,7 @@ var CarPicsSpinnerAPI = (function() {
                                         thisInternal.displayNextImage(1);
                                         thisInternal.mouseYPosition = currentYPosition;
                                         thisInternal.mouseXPosition = thisObj.mouseXPosition - thisObj.spinSensitivity;
-                                    }
+                                    } 
                                     while (currentXPosition - thisInternal.mouseXPosition > thisInternal.spinSensitivity) {
                                         thisInternal.mouseYPosition = currentYPosition;
                                         thisInternal.mouseXPosition = thisObj.mouseXPosition + thisObj.spinSensitivity;
@@ -543,8 +579,8 @@ var CarPicsSpinnerAPI = (function() {
             })(this));
         }
         /*
-         * Default spinner styles to prevent images overflowing, and to show grab hand.
-         */
+        * Default spinner styles to prevent images overflowing, and to show grab hand.
+        */
         this.setDefaultSpinnerStyles = function() {
             this.spinnerDiv.style.cursor = "grab";
             this.spinnerDiv.style.cursor = "-webkit-grab";
@@ -596,26 +632,28 @@ var CarPicsSpinnerAPI = (function() {
         }
     }
     /*
-     * CarPicsImage is a wrapper on functionality for the image container element.  
-     * Contains image readiness information as well.
-     */
+    * CarPicsImage is a wrapper on functionality for the image container element.  
+    * Contains image readiness information as well.
+    */
     this.CarPicsImage = function(source, index, div, callback) {
+        this.zoomIntensity =1;
         /*
         * Controls CSS to properly allow zoom functionality.
         */
         this.zoom = function(baseEvent) {
             var offset = this.HTMLElement.getBoundingClientRect();
-            this.HTMLElement.style.maxHeight = "200%";
-            this.HTMLElement.style.maxWidth = "200%";
-            this.HTMLElement.style.height = "200%";
-            this.HTMLElement.style.width = "200%";
+            this.zoomIntensity=this.zoomIntensity*2;
+            this.HTMLElement.style.maxHeight = this.zoomIntensity+"00%";
+            this.HTMLElement.style.maxWidth = this.zoomIntensity+"00%";
+            this.HTMLElement.style.height = this.zoomIntensity+"00%";
+            this.HTMLElement.style.width = this.zoomIntensity+"00%";
             var clientX = baseEvent.type == "dblclick" ? baseEvent.pageX - window.scrollX : baseEvent.targetTouches[0].clientX;
             var clientY = baseEvent.type == "dblclick" ? baseEvent.pageY - window.scrollY : baseEvent.targetTouches[0].clientY;
-            this.move(clientX,clientY);
+            this.move(clientX,clientY, offset);
         }
         /*
-         * Resets element to default after zoom end.
-         */
+        * Resets element to default after zoom end.
+        */
         this.unzoom = function() {
             this.HTMLElement.style.maxHeight = "100%";
             this.HTMLElement.style.maxWidth = "100%";
@@ -625,24 +663,318 @@ var CarPicsSpinnerAPI = (function() {
             this.HTMLElement.style.top = 0 + 'px';
         }
         /*
-         * Allows moving view within zoomed element.
-         */
-        this.move = function(mouseX, mouseY) {
-            var offset = this.HTMLElement.parentElement.getBoundingClientRect();
-            var mouseXOffset;
-            var mouseYOffset;
-            if (mouseX > offset.left && mouseX < (offset.left + offset.width) && mouseY > offset.top && mouseY < (offset.top + offset.height)) {
-                mouseXOffset = offset.left - mouseX;
-                mouseYOffset = offset.top - mouseY;
+        * Allows moving view within zoomed element.
+        */
+        this.move = function(mouseX, mouseY, offset) {
+            var parentOffset = this.HTMLElement.parentElement.getBoundingClientRect();
+            if (mouseX > parentOffset.left && mouseX < (parentOffset.left + parentOffset.width) 
+                && mouseY > parentOffset.top && mouseY < (parentOffset.top + parentOffset.height)) {
+                var correctX = (offset.left - parentOffset.left)*this.zoomIntensity/2 + parentOffset.width/2 - mouseX * this.zoomIntensity/2;
+                var correctY = (offset.top - parentOffset.top )*this.zoomIntensity/2 + parentOffset.height/2- mouseY * this.zoomIntensity/2;            
             } else {
                 return;
             }
-            this.HTMLElement.style.left = mouseXOffset / document.documentElement.clientWidth * 100 + 'vw';
-            this.HTMLElement.style.top = mouseYOffset / document.documentElement.clientWidth * 100 + 'vw';
+            this.HTMLElement.style.left = correctX + 'px';
+            this.HTMLElement.style.top = correctY + 'px';
+        }
+        this.displayPointsOfInterest = function(source){
+            if(typeof source.poi == "undefined"){
+                return;
+            }
+            var poi = source.poi;
+            for(var i=0;i<poi.length;i++){
+                var div = document.createElement("div");
+                div.title=poi[i].name;
+                div.style.width="24px";
+                div.style.height="24px";
+                div.style.backgroundColor="#fff";
+                div.style.zIndex="21";
+                div.style.position="absolute";
+                div.style.left=poi[i].position.x+"%";
+                div.style.marginLeft="-12px";
+                div.style.marginTop="-12px";
+                div.style.top=poi[i].position.y+"%";
+                div.style.borderRadius="24px";
+                div.style.color="#09A8FA";   //option 1: "#09A8FA"; option 2: "#EF255F"
+                div.setAttribute("data-toggle", "tooltip");
+                div.setAttribute("data-placement", "top");  // display tooltip on top
+                div.className="hotspot";
+                var iElement = document.createElement("i");
+                iElement.className="material-icons";
+                iElement.innerHTML="stars";    //option 1: "stars"; option 2: "error"
+                div.appendChild(iElement);
+                div.onmouseover = (function(element, poi){
+                    return function(){
+                        var position = element.getBoundingClientRect();
+                        console.log(position);
+                        var modal = document.createElement("div");
+                        modal.setAttribute("id", "modalHover");
+                        modal.style.position="absolute";
+                        modal.style.margin="auto";
+                        if (poi.position.x<=50&&poi.position.y<=50){
+                            modal.style.top=(position.top+position.height*poi.position.y/100)+"px";
+                            modal.style.left=(position.left+position.width*poi.position.x/100)+"px";
+                            modal.style.marginTop="10px";
+                            modal.style.marginLeft="10px";
+                        } else if (poi.position.x>50&&poi.position.y<=50){
+                            modal.style.top=(position.top+position.height*poi.position.y/100)+"px";
+                            modal.style.right=(position.right-position.width*poi.position.x/100)+"px";
+                            modal.style.marginTop="10px";
+                            modal.style.marginRight="10px";
+                        } else if (poi.position.x>50&&poi.position.y>50){
+                            modal.style.bottom=(position.bottom-position.height*poi.position.y/100+90)+"px";
+                            modal.style.right=(position.right-position.width*poi.position.x/100)+"px";
+                            modal.style.marginBottom="15px";
+                            modal.style.marginRight="15px";
+                        } else if (poi.position.x<=50&&poi.position.y>50){
+                            modal.style.bottom=(position.bottom-position.height*poi.position.y/100+90)+"px";
+                            modal.style.left=(position.left+position.width*poi.position.x/100)+"px";
+                            modal.style.marginBottom="15px";
+                            modal.style.marginLeft="15px";
+                        }
+                        modal.style.width="250px";
+                        modal.style.background="#fff";
+                        modal.style.borderRadius="5px";
+                        modal.style.cursor="default";
+                        modal.style.zIndex="32";
+                        modal.style.opacity="0.95";
+                        document.body.insertBefore(modal,document.body.firstChild);
+
+                        var modalHead = document.createElement("div");
+                        modalHead.style.height="30px";
+                        modalHead.style.background="#0d82bf";   //option 1: "#0d82bf"; option 2: "#CA1246"
+                        modalHead.innerHTML=poi.name;
+                        modalHead.style.color="#EAEAEA";
+                        modalHead.style.borderRadius="5px 5px 0px 0px";
+                        modalHead.style.fontSize="1em";
+                        modalHead.style.padding="4px 10px";
+                        modal.appendChild(modalHead);
+
+                        var modalBody = document.createElement("div");
+                        modalBody.style.padding="10px";
+                        modal.appendChild(modalBody);
+
+                        var img = new Image();
+                        img.src="http://cdn.carpics2p0.com/" + poi.sourceUrl;
+                        img.style.width="100%";
+                        img.style.height="100%";
+                        img.style.marginBottom="10px";
+                        modalBody.appendChild(img);
+
+                        var poiNotes = document.createElement("div");
+                        poiNotes.setAttribute("id", "poiNotes");
+                        poiNotes.style.fontSize="0.9em";
+                        poiNotes.innerHTML=poi.notes;
+                        poiNotes.style.whiteSpace="pre-line";
+                        poiNotes.style.overflow="hidden";
+                        poiNotes.style.maxHeight="4.2em";
+                        poiNotes.style.display="-webkit-box";
+                        poiNotes.style['-webkit-line-clamp']=3;
+                        poiNotes.style['-webkit-box-orient']="vertical";
+                        modalBody.appendChild(poiNotes);
+                    }
+                })(this.HTMLElement, poi[i]);
+                div.onmouseout = (function(){
+                    return function(){
+                        document.getElementById("modalHover").remove();
+                    }
+                })(this.HTMLElement, poi[i]);
+                // // Modal version 1: partly cover image (either on page level or inside image wrap div)
+                // div.onclick = (function(element,poi){
+                //     return function(){
+                //         var overlay = document.createElement("div");
+                //         overlay.setAttribute("id", "popModalContainer");
+                //         overlay.style.position="absolute";
+                //         overlay.style.width="100%";
+                //         overlay.style.height="100%";
+                //         overlay.style.zIndex="32";
+                //         overlay.style.background="#00000088";
+                //         // Display modal on page level
+                //         // document.body.insertBefore(overlay,document.body.firstChild);
+                //         element.parentElement.insertBefore(overlay,element);
+                //         // close modal when user click outside modal
+                //         overlay.onclick = (function(e){
+                //             if(e.target.id=="popModalContainer"){
+                //                 document.getElementById("popModalContainer").remove();
+                //             }
+                //         });
+
+                //         var modal = document.createElement("div");
+                //         modal.setAttribute("id", "popModal");
+                //         modal.style.width="60%";
+                //         modal.style.maxHeight="85%";
+                //         modal.style.margin="5% auto 5% auto";
+                //         modal.style.background="#fff";
+                //         modal.style.borderRadius="8px";
+                //         modal.style.cursor="default";
+                //         modal.style.overflow="scroll";
+                //         overlay.appendChild(modal);
+
+                //         var modalHead = document.createElement("div");
+                //         modalHead.style.height="36px";
+                //         modalHead.style.width="60%";
+                //         modalHead.style.background="#0d82bf";   //option 1: "#0d82bf"; option 2: "#CA1246"
+                //         modalHead.innerHTML=poi.name;
+                //         modalHead.style.color="#EAEAEA";
+                //         modalHead.style.borderRadius="5px 5px 0px 0px";
+                //         modalHead.style.fontSize="1.2em";
+                //         modalHead.style.padding="6px 15px";
+                //         modalHead.style.position="absolute";
+                //         modal.appendChild(modalHead);
+
+                //         var modalHeadIcons = document.createElement("span");
+                //         modalHeadIcons.style.float="right";
+                //         modal.style.cursor="pointer";
+                //         modalHead.appendChild(modalHeadIcons);
+
+                //         var modalCancelIcon = document.createElement("i");
+                //         modalCancelIcon.className="material-icons";
+                //         modalCancelIcon.innerHTML="clear";
+                //         modalCancelIcon.onclick=(function(overlay){
+                //             document.getElementById("popModalContainer").remove();
+                //         });
+                //         modalHeadIcons.appendChild(modalCancelIcon);
+
+                //         var modalBody = document.createElement("div");
+                //         modalBody.style.padding="15px";
+                //         modalBody.style.marginTop="36px";
+                //         modal.appendChild(modalBody);
+
+                //         var img = new Image();
+                //         img.src="http://cdn.carpics2p0.com/" + poi.sourceUrl;
+                //         img.style.width="100%";
+                //         img.style.height="100%";
+                //         img.style.marginBottom="10px";
+                //         modalBody.appendChild(img);
+
+                //         var poiNotes = document.createElement("div");
+                //         poiNotes.innerHTML=poi.notes;
+                //         poiNotes.style.whiteSpace="pre-line";
+                //         modalBody.appendChild(poiNotes);
+
+                //         var offset = element.getBoundingClientRect();
+                //         var XOffset;
+                //         var YOffset;
+                //         if (poi.position.x > offset.left && poi.position.y < (offset.left + offset.width) && poi.position.y > offset.top && poi.position.y < (offset.top + offset.height)) {
+                //             XOffset = offset.left - poi.position.x;
+                //             YOffset = offset.top - poi.position.y;
+                //         } else {
+                //             return;
+                //         }
+                //         this.HTMLElement.style.left = XOffset / document.documentElement.clientWidth * 100 + 'vw';
+                //         this.HTMLElement.style.top = YOffset / document.documentElement.clientWidth * 100 + 'vw';
+                //     }
+                // })(this.HTMLElement, poi[i]);
+                // // Modal version 2: cover the whole image
+                div.onclick = (function(element,poi){
+                    return function(){
+                        var overlay = document.createElement("div");
+                        overlay.setAttribute("id", "popModalContainer");
+                        overlay.style.position="absolute";
+                        overlay.style.width="100%";
+                        overlay.style.height="100%";
+                        overlay.style.zIndex="32";
+                        overlay.style.background="#00000088";
+                        element.parentElement.insertBefore(overlay,element);
+                        // close modal when user click outside modal
+                        overlay.onclick = (function(e){
+                            if(e.target.id=="popModalContainer"){
+                                document.getElementById("popModalContainer").remove();
+                            }
+                        });
+
+                        var modal = document.createElement("div");
+                        modal.setAttribute("id", "popModal");
+                        modal.style.width="100%";
+                        modal.style.height="100%";
+                        modal.style.background="rgba(255, 255, 255, 0.88)";
+                        modal.style.cursor="default";
+                        modal.style.overflow="hidden";
+                        overlay.appendChild(modal);
+
+                        var modalHead = document.createElement("div");
+                        modalHead.style.height="40px";
+                        modalHead.innerHTML=poi.name;
+                        modalHead.style.color="#000";
+                        modalHead.style.fontSize="1.2em";
+                        modalHead.style.padding="6px 15px";
+                        modalHead.style.textAlign="center";
+                        modal.appendChild(modalHead);
+
+                        var modalImage = document.createElement("div");
+                        modalImage.style.width="64%";
+                        modalImage.style.float="left";
+                        modalImage.style.padding="1% 1%";
+                        modal.appendChild(modalImage);
+
+                        var modalInfo = document.createElement("div");
+                        modalInfo.style.width="36%";
+                        modalInfo.style.overflow="hidden";
+                        modalInfo.style.padding="1% 1% 1% 0";
+                        modal.appendChild(modalInfo);
+
+                        var modalHeadIcons = document.createElement("span");
+                        modalHeadIcons.style.float="right";
+                        modal.style.cursor="pointer";
+                        modalHead.appendChild(modalHeadIcons);
+
+                        var modalCancelIcon = document.createElement("i");
+                        modalCancelIcon.className="material-icons";
+                        modalCancelIcon.innerHTML="clear";
+                        modalCancelIcon.onclick=(function(overlay){
+                            document.getElementById("popModalContainer").remove();
+                        });
+                        modalHeadIcons.appendChild(modalCancelIcon);
+
+                        var ghr = document.createElement("hr");
+                        ghr.style.border="0";
+                        ghr.style.height="1px";
+                        ghr.style.margin="5px 0";
+                        ghr.style.backgroundImage="linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1), rgba(0, 0, 0, 0))";
+                        modalHead.appendChild(ghr);
+
+                        var modalBody = document.createElement("div");
+                        modalBody.style.padding="15px 0px";
+                        modalInfo.appendChild(modalBody);
+
+                        var img = new Image();
+                        img.src="http://cdn.carpics2p0.com/" + poi.sourceUrl;
+                        img.style.width="90%";
+                        img.style.height="auto";
+                        img.style.marginTop="16px";
+                        img.style.marginLeft="16px";
+                        img.style.border="1px solid #ddd";
+                        img.style.padding="4px";
+                        img.style.borderRadius="4px";
+                        modalImage.appendChild(img);
+
+                        var poiNotes = document.createElement("div");
+                        poiNotes.innerHTML=poi.notes;
+                        poiNotes.style.color="#000";
+                        poiNotes.style.letterSpacing="0.3px";
+                        poiNotes.style.fontWeight="200";
+                        poiNotes.style.whiteSpace="pre-line";
+                        modalBody.appendChild(poiNotes);
+
+                        var offset = element.getBoundingClientRect();
+                        var XOffset;
+                        var YOffset;
+                        if (poi.position.x > offset.left && poi.position.y < (offset.left + offset.width) && poi.position.y > offset.top && poi.position.y < (offset.top + offset.height)) {
+                            XOffset = offset.left - poi.position.x;
+                            YOffset = offset.top - poi.position.y;
+                        } else {
+                            return;
+                        }
+                        this.HTMLElement.style.left = XOffset / document.documentElement.clientWidth * 100 + 'vw';
+                        this.HTMLElement.style.top = YOffset / document.documentElement.clientWidth * 100 + 'vw';
+                    }
+                })(this.HTMLElement, poi[i]);
+                this.HTMLElement.appendChild(div);
+            }
         }
         /*
-         * Default Image styles and sets up transitions which make movements nicer.
-         */
+        * Default Image styles and sets up transitions which make movements nicer.
+        */
         this.setDefaultImageStyles = function() {
             this.HTMLElement.style.position = "relative";
             this.HTMLElement.style.maxHeight = "100%";
@@ -688,6 +1020,8 @@ var CarPicsSpinnerAPI = (function() {
         this.imgElement = document.createElement("img");
         this.HTMLElement = document.createElement("div");
         this.HTMLElement.appendChild(this.imgElement);
+        this.displayPointsOfInterest(source);
+        $('[data-toggle="tooltip"').tooltip();  //enable tooltip on page
         this.setDefaultImageStyles();
         this.imgElement.setAttribute("src", source.src);
         this.HTMLElement.setAttribute("id", this.elementId);
@@ -718,8 +1052,7 @@ var CarPicsSpinnerAPI = (function() {
                 autospinDirection: div.getAttribute("autospinDirection") == "left" ? -1 : 1,
                 spinOnLoad: div.getAttribute("spinOnLoad"),
                 divId: div.getAttribute("id"),
-                sourceURL: "http://feed.carpics2p0.com/rest/spinner/s3?dealer="+div.getAttribute("dealer")
-                +"&vin=" + div.getAttribute("vin"),
+                sourceURL: "http://localhost:8082/apioutput.json",
                 autospinSleep: div.getAttribute("autospinSleep"),
                 spinSensitivity: div.getAttribute("spinSensitivity"),
                 disableMouse: div.getAttribute("disableMouse"),
