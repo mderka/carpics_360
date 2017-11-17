@@ -704,41 +704,37 @@ var CarPicsSpinnerAPI = (function() {
                 iElement.innerHTML="stars";    //option 1: "stars"; option 2: "error"
                 div.appendChild(iElement);
                 div.onmouseover = (function(element, poi){
-                    return function(){
-                        var position = element.getBoundingClientRect();
-                        console.log(position);
+                    return function(e){
+                        var position = element.parentNode.getBoundingClientRect();
+                        var modalWidth=position.width/4;
+                        var modalHeight=position.height/2.2;
                         var modal = document.createElement("div");
                         modal.setAttribute("id", "modalHover");
                         modal.style.position="absolute";
                         modal.style.margin="auto";
-                        if (poi.position.x<=50&&poi.position.y<=50){
-                            modal.style.top=(position.top+position.height*poi.position.y/100)+"px";
-                            modal.style.left=(position.left+position.width*poi.position.x/100)+"px";
-                            modal.style.marginTop="10px";
+                        if (e.clientX-position.left<position.width-modalWidth-25){
+                            modal.style.left=(e.clientX-position.left)+"px";
                             modal.style.marginLeft="10px";
-                        } else if (poi.position.x>50&&poi.position.y<=50){
-                            modal.style.top=(position.top+position.height*poi.position.y/100)+"px";
-                            modal.style.right=(position.right-position.width*poi.position.x/100)+"px";
-                            modal.style.marginTop="10px";
+                        } else {
+                            modal.style.right=(position.width+position.left-e.clientX)+"px";
                             modal.style.marginRight="10px";
-                        } else if (poi.position.x>50&&poi.position.y>50){
-                            modal.style.bottom=(position.bottom-position.height*poi.position.y/100+90)+"px";
-                            modal.style.right=(position.right-position.width*poi.position.x/100)+"px";
-                            modal.style.marginBottom="15px";
-                            modal.style.marginRight="15px";
-                        } else if (poi.position.x<=50&&poi.position.y>50){
-                            modal.style.bottom=(position.bottom-position.height*poi.position.y/100+90)+"px";
-                            modal.style.left=(position.left+position.width*poi.position.x/100)+"px";
-                            modal.style.marginBottom="15px";
-                            modal.style.marginLeft="15px";
                         }
-                        modal.style.width="250px";
+
+                        if (e.clientY-position.top<position.height-modalHeight-25){
+                            modal.style.top=(e.clientY-position.top)+"px";
+                            modal.style.marginTop="10px";
+                        } else {
+                            modal.style.bottom=(position.height+position.top-e.clientY)+"px";
+                            modal.style.marginBottom="10px";
+                        }
+                        modal.style.width=modalWidth+"px";
+                        modal.style.maxHeight=modalHeight+"px";
                         modal.style.background="#fff";
                         modal.style.borderRadius="5px";
-                        modal.style.cursor="default";
                         modal.style.zIndex="32";
                         modal.style.opacity="0.95";
-                        document.body.insertBefore(modal,document.body.firstChild);
+                        modal.style.overflow="hidden";
+                        element.parentElement.insertBefore(modal,element);
 
                         var modalHead = document.createElement("div");
                         modalHead.style.height="30px";
@@ -772,6 +768,15 @@ var CarPicsSpinnerAPI = (function() {
                         poiNotes.style['-webkit-line-clamp']=3;
                         poiNotes.style['-webkit-box-orient']="vertical";
                         modalBody.appendChild(poiNotes);
+
+                        // if modal size is too small, adjust content size & padding
+                        if (modalHeight<200){
+                            modalHead.style.height="24px";
+                            modalHead.style.fontSize="0.85em";
+                            modalBody.style.padding="6px";
+                            img.style.marginBottom="5px";
+                            poiNotes.style['-webkit-line-clamp']=2;
+                        };
                     }
                 })(this.HTMLElement, poi[i]);
                 div.onmouseout = (function(){
@@ -888,7 +893,7 @@ var CarPicsSpinnerAPI = (function() {
                         modal.style.width="100%";
                         modal.style.height="100%";
                         modal.style.background="rgba(255, 255, 255, 0.88)";
-                        modal.style.cursor="default";
+                        modal.style.cursor="default !important";
                         modal.style.overflow="hidden";
                         overlay.appendChild(modal);
 
