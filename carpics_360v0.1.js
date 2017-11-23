@@ -456,13 +456,12 @@ var CarPicsSpinnerAPI = (function() {
             })(this));
 
             /*
-            * Print points of interest on current image on every mousemove.
+            * Hotspot opacity changes depending on the distance between current mouse position and hotspot.
             */
             document.getElementById(this.divId).addEventListener("mousemove", (function(thisObj) {
                 return function(baseEvent) {
                     var list = thisObj.CurrentImage.getPointsOfInterest();
                     var spinnerDivPosition = thisObj.CurrentImage.HTMLElement.parentElement.getBoundingClientRect();
-
                     for (var i=0; i<list.length; i++) {
                         var poi_x = list[i].HTMLElement.offsetLeft;
                         var poi_y = list[i].HTMLElement.offsetTop;
@@ -487,6 +486,15 @@ var CarPicsSpinnerAPI = (function() {
                     baseEvent.preventDefault();
                     if (thisObj.zoomed || thisObj.mouseDisabled) {
                         return;
+                    }
+                    // Display hotspots at mouseup event (after spinning), depending on current status.
+                    if (thisObj.displayHotspots&&thisObj.turning) {
+                        for (j=0; j<thisObj.AllImages.length; j++) {
+                            var list = thisObj.AllImages[j].getPointsOfInterest();
+                            for (var i=0; i<list.length; i++) {
+                                thisObj.AllImages[j].HTMLElement.appendChild(list[i].HTMLElement);
+                            }
+                        }
                     }
                     thisObj.spinStatus = thisObj.spinDefault;
                     thisObj.turnStatus = false;
@@ -518,12 +526,36 @@ var CarPicsSpinnerAPI = (function() {
                             thisObj.CurrentImage.HTMLElement.getBoundingClientRect(), true);
                     } else {
                         while (thisObj.mouseXPosition - currentXPosition > thisObj.spinSensitivity){
+                            // Hide hotspots during spinning
+                            if ( thisObj.displayHotspots== true ) {
+                                var hotspots = document.getElementsByClassName("hotspot");
+                                while (hotspots.length > 0) {
+                                    hotspots[0].parentElement.removeChild(hotspots[0]);
+                                }
+                            }
+                            // If spinning was triggered inside a hotspot, remove modalHover
+                            if (document.getElementById("modalHover")) {
+                                var modalHover = document.getElementById("modalHover");
+                                modalHover.parentElement.removeChild(modalHover);
+                            }
                             thisObj.turning = true;
                             thisObj.displayNextImage(1);
                             thisObj.mouseYPosition = currentYPosition;
                             thisObj.mouseXPosition = thisObj.mouseXPosition - thisObj.spinSensitivity;
                         }
                         while (currentXPosition - thisObj.mouseXPosition > thisObj.spinSensitivity) {
+                            // Hide hotspots during spinning
+                            if ( thisObj.displayHotspots== true ) {
+                                var hotspots = document.getElementsByClassName("hotspot");
+                                while (hotspots.length > 0) {
+                                    hotspots[0].parentElement.removeChild(hotspots[0]);
+                                }
+                            }
+                            // If spinning was triggered inside a hotspot, remove modalHover
+                            if (document.getElementById("modalHover")) {
+                                var modalHover = document.getElementById("modalHover");
+                                modalHover.parentElement.removeChild(modalHover);
+                            }
                             thisObj.turning = true;
                             thisObj.displayNextImage(-1);
                             thisObj.mouseYPosition = currentYPosition;
@@ -532,7 +564,6 @@ var CarPicsSpinnerAPI = (function() {
                     }
                 }
             })(this));
-
 
             /*
             * Touchstart event starts manual rotation (drag spin), also needed to bind 
@@ -785,6 +816,7 @@ var CarPicsSpinnerAPI = (function() {
                 div.appendChild(spanElement);
                 div.onmouseover = (function(element, poi){
                     return function(e){
+                        e.stopPropagation();
                         var position = element.parentNode.getBoundingClientRect();
                         var modalWidth=position.width/4;
                         var modalHeight=position.height/2.2;
@@ -871,9 +903,13 @@ var CarPicsSpinnerAPI = (function() {
                             modalHead.style.fontSize="0.85em";
                             modalHeadText.style.marginLeft="6px";
                             modalBody.style.padding="6px";
-                            img.style.marginBottom="5px";
-                            poiNotes.style['-webkit-line-clamp']=2;
-                            poiNotes.style.fontSize="0.7em";
+                            if (typeof img !== "undefined") {
+                                img.style.marginBottom="5px";
+                            }
+                            if (typeof poiNotes !== "undefined"){
+                                poiNotes.style['-webkit-line-clamp']=2;
+                                poiNotes.style.fontSize="0.7em";
+                            }
                         };
                     }
                 })(this.HTMLElement, poi[i]);
@@ -1181,7 +1217,7 @@ var CarPicsSpinnerAPI = (function() {
         var CarpicsDiv = CarpicsDivs[0];
         var buttonWrap = document.createElement("div");
         buttonWrap.style.position="absolute";
-        buttonWrap.style.top="45%";
+        buttonWrap.style.top= "40%";
         buttonWrap.style.right="6px";
         buttonWrap.style.zIndex="20";
         buttonWrap.style.opacity="0.8";
