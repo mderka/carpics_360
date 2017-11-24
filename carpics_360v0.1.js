@@ -397,7 +397,6 @@ var CarPicsSpinnerAPI = (function() {
                         thisObj.spinStatus = thisObj.spinDefault;
                         thisObj.turnStatus = false;
                     }
-
                 }
             })(this));
 
@@ -436,9 +435,7 @@ var CarPicsSpinnerAPI = (function() {
                             hotspots[0].parentElement.removeChild(hotspots[0]);
                         }
                         thisObj.displayHotspots = false;
-                        document.getElementById("hotspot_button").innerHTML="H";
-                        document.getElementById("hotspot_button").style.background="#fff";
-                        document.getElementById("hotspot_button").style.color="#333";
+                        document.getElementById("hotspot_button").innerHTML="&#8709";
                     } else {
                         // display hotspots
                         for (j=0; j<thisObj.AllImages.length; j++) {
@@ -449,8 +446,6 @@ var CarPicsSpinnerAPI = (function() {
                         }
                         thisObj.displayHotspots = true;
                         document.getElementById("hotspot_button").innerHTML="&#8984";
-                        document.getElementById("hotspot_button").style.background="#888";
-                        document.getElementById("hotspot_button").style.color="#fff";
                     }
                 }
             })(this));
@@ -462,11 +457,12 @@ var CarPicsSpinnerAPI = (function() {
                 return function(baseEvent) {
                     var list = thisObj.CurrentImage.getPointsOfInterest();
                     var spinnerDivPosition = thisObj.CurrentImage.HTMLElement.parentElement.getBoundingClientRect();
+                    var imgPosition = thisObj.CurrentImage.HTMLElement.getBoundingClientRect();
                     for (var i=0; i<list.length; i++) {
-                        var poi_x = list[i].HTMLElement.offsetLeft;
-                        var poi_y = list[i].HTMLElement.offsetTop;
-                        var mouse_x = baseEvent.clientX - spinnerDivPosition.x;
-                        var mouse_y = baseEvent.clientY - spinnerDivPosition.y;
+                        var poi_x = imgPosition.left+list[i].info.x*imgPosition.width/100;
+                        var poi_y = imgPosition.top+list[i].info.y*imgPosition.height/100;
+                        var mouse_x = baseEvent.clientX;
+                        var mouse_y = baseEvent.clientY;
                         var distance = (mouse_x-poi_x)*(mouse_x-poi_x)+(mouse_y-poi_y)*(mouse_y-poi_y);
                         distance = Math.sqrt(distance);
                         var max_distance = spinnerDivPosition.width*spinnerDivPosition.width+spinnerDivPosition.height*spinnerDivPosition.height;
@@ -522,8 +518,8 @@ var CarPicsSpinnerAPI = (function() {
                         if(thisObj.multiZoom){
                             //return;
                         }
-                        thisObj.CurrentImage.move(baseEvent, 
-                            thisObj.CurrentImage.HTMLElement.getBoundingClientRect(), true);
+                        // thisObj.CurrentImage.move(baseEvent, 
+                            // thisObj.CurrentImage.HTMLElement.getBoundingClientRect(), true);
                     } else {
                         while (thisObj.mouseXPosition - currentXPosition > thisObj.spinSensitivity){
                             // Hide hotspots during spinning
