@@ -345,6 +345,9 @@ var CarPicsSpinnerAPI = (function() {
                     baseEvent.preventDefault();
                     var thisTouch = Date.now();
                     if (thisObj.zoomed || baseEvent.button === 2) {
+                        thisObj.mouseHold = true;
+                        thisObj.lastXPosition = baseEvent.pageX;
+                        thisObj.lastYPosition = baseEvent.pageY;
                         return;
                     }
                     if(thisObj.interacted){
@@ -359,6 +362,7 @@ var CarPicsSpinnerAPI = (function() {
                     thisObj.spinnerDiv.style.cursor = "-webkit-move";
                     thisObj.spinnerDiv.style.cursor = "move";
                     thisObj.spinnerDiv.style.cursor = "-moz-move";
+                    
                 }
             })(this));
 
@@ -481,6 +485,7 @@ var CarPicsSpinnerAPI = (function() {
                 return function(baseEvent) {
                     baseEvent.preventDefault();
                     if (thisObj.zoomed || thisObj.mouseDisabled) {
+                        thisObj.mouseHold = false;
                         return;
                     }
                     // Display hotspots at mouseup event (after spinning), depending on current status.
@@ -498,6 +503,7 @@ var CarPicsSpinnerAPI = (function() {
                     thisObj.spinnerDiv.style.cursor = "-webkit-grab";
                     thisObj.spinnerDiv.style.cursor = "grab";
                     thisObj.spinnerDiv.style.cursor = "-moz-grab";
+                    
                 }
             })(this));
 
@@ -514,13 +520,15 @@ var CarPicsSpinnerAPI = (function() {
                     }
                     var currentXPosition = baseEvent.pageX;
                     var currentYPosition = baseEvent.pageY;
-                    if (thisObj.zoomed == true) {
+                    if (thisObj.zoomed == true && thisObj.mouseHold) {
                         if(thisObj.multiZoom){
                             //return;
                         }
-                        // thisObj.CurrentImage.move(baseEvent, 
-                            // thisObj.CurrentImage.HTMLElement.getBoundingClientRect(), true);
-                    } else {
+                        thisObj.CurrentImage.dragMove(baseEvent, 
+                            thisObj.CurrentImage.HTMLElement.getBoundingClientRect(), true, thisObj.lastXPosition, thisObj.lastYPosition);
+                        thisObj.lastXPosition = baseEvent.clientX;
+                        thisObj.lastYPosition = baseEvent.clientY;
+                    } else if (thisObj.zoomed == false) {
                         while (thisObj.mouseXPosition - currentXPosition > thisObj.spinSensitivity){
                             // Hide hotspots during spinning
                             if ( thisObj.displayHotspots== true ) {
@@ -775,6 +783,34 @@ var CarPicsSpinnerAPI = (function() {
             this.HTMLElement.style.left = correctX + 'px';
             this.HTMLElement.style.top = correctY + 'px';
         }
+        this.dragMove = function(baseEvent, offset, zoomed, originalX, originalY) {
+            var multiplier = 1;
+            var parentOffset = this.HTMLElement.parentElement.getBoundingClientRect();
+            var clientX = (baseEvent.type !== "touchmove" ? baseEvent.clientX : baseEvent.targetTouches[0].clientX) - parentOffset.left;
+            var clientY = (baseEvent.type !== "touchmove" ? baseEvent.clientY : baseEvent.targetTouches[0].clientY) - parentOffset.top;
+            var shiftX = clientX - originalX;
+            var shiftY = clientY - originalY;
+            var correctX = offset.left + shiftX/multiplier;
+            var correctY =  offset.top + shiftY/multiplier;
+            // console.log('offset.left: ' + offset.left + ', offset.top: ' + offset.top);
+            // console.log('originalX: ' + originalX + ', originalY: ' + originalY);
+            // console.log('clientX: ' + clientX + ', clientY: ' + clientY);
+            // console.log('shiftX: ' + shiftX + ', shiftY: ' + shiftY);
+            console.log('correctX: ' + correctX + ', correctY: ' + correctY);
+            if(correctX>0){
+                correctX=0;
+            } else if (-correctX > (multiplier*offset.width-parentOffset.width)) {
+                correctX = -(multiplier*offset.width-parentOffset.width);
+            }
+            if(correctY>0){
+                correctY=0;
+            } else if (-correctY > (multiplier*offset.height-parentOffset.height)) {
+                correctY = -(multiplier*offset.height-parentOffset.height);
+            }
+            this.HTMLElement.style.left = correctX + 'px';
+            this.HTMLElement.style.top = correctY + 'px';
+
+        }
         this.listOfPointsOfInterest = [];
         this.displayPointsOfInterest = function(source){
             if(typeof source.poi == "undefined"){
@@ -783,7 +819,7 @@ var CarPicsSpinnerAPI = (function() {
             var poi = source.poi;
             for(var i=0;i<poi.length;i++){
                 var div = document.createElement("div");
-                div.title=poi[i].name;
+                // div.title=poi[i].name;
                 div.style.width="24px";
                 div.style.height="24px";
                 div.style.backgroundColor="#fff";
