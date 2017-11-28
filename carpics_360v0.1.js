@@ -106,6 +106,7 @@ var CarPicsSpinnerAPI = (function() {
         if(typeof config.overlaySource != "undefined" && config.overlaySource !== null) {
             this.loadSpinner();
         }
+
         /*
         * Chooses the next image to load by halfing the distance from the current cursor to the next cursor.
         * If no images need to load, move the loadcursor forward one until cursor has moved n times or has found
@@ -241,7 +242,7 @@ var CarPicsSpinnerAPI = (function() {
             } else if (!this.zoomed || this.multiZoom){
                 this.pauseMouseTime = Date.now() + 500;
                 this.zoomed = true;
-                document.getElementById("zoom_in_button").style.background="#444";
+                document.getElementById("zoom_in_button").style.background="#888";
                 document.getElementById("zoom_in_button").style.color="#eaeaea";
                 this.spinStatus = false;
                 this.CurrentImage.zoom(baseEvent);
@@ -346,8 +347,6 @@ var CarPicsSpinnerAPI = (function() {
                     var thisTouch = Date.now();
                     if (thisObj.zoomed || baseEvent.button === 2) {
                         thisObj.mouseHold = true;
-                        thisObj.lastXPosition = baseEvent.pageX;
-                        thisObj.lastYPosition = baseEvent.pageY;
                         return;
                     }
                     if(thisObj.interacted){
@@ -404,6 +403,18 @@ var CarPicsSpinnerAPI = (function() {
                 }
             })(this));
 
+            document.getElementById("zoom_in_button").addEventListener("mouseleave", (function(thisObj) {
+                return function(baseEvent) {
+                    if (thisObj.zoomed == true) {
+                        document.getElementById("zoom_in_button").style.background="#888";
+                        document.getElementById("zoom_in_button").style.color="#fff";
+                    } else {
+                        document.getElementById("zoom_in_button").style.background="#fff";
+                        document.getElementById("zoom_in_button").style.color="#333";
+                    }
+                }
+            })(this));
+
             /*
             * Clicking on zoomout button triggers desktop zoom out event.
             */
@@ -412,8 +423,8 @@ var CarPicsSpinnerAPI = (function() {
                     baseEvent.stopPropagation();
                     CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
                     baseEvent.preventDefault();
-                    var releaseMouse = thisObj.zoomToggle(baseEvent, true);
                     if (thisObj.zoomed === true) {
+                        var releaseMouse = thisObj.zoomToggle(baseEvent, true);
                         thisObj.spinStatus = false;
                         thisObj.turnStatus = false;
                     } else {
@@ -455,6 +466,18 @@ var CarPicsSpinnerAPI = (function() {
             })(this));
 
             /*
+            * Prevent double click on buttons
+            */
+            document.getElementById("buttonWrap").addEventListener("dblclick", (function(thisObj) {
+                return function(baseEvent) {
+                    baseEvent.stopPropagation();
+                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Doubleclick'});
+                    baseEvent.preventDefault();
+                    return;
+                }
+            })(this));
+
+            /*
             * Hotspot opacity changes depending on the distance between current mouse position and hotspot.
             */
             document.getElementById(this.divId).addEventListener("mousemove", (function(thisObj) {
@@ -472,7 +495,7 @@ var CarPicsSpinnerAPI = (function() {
                         var max_distance = spinnerDivPosition.width*spinnerDivPosition.width+spinnerDivPosition.height*spinnerDivPosition.height;
                         max_distance = Math.sqrt(max_distance);
                         var distance_ratio = 1 - distance/max_distance;
-                        distance_ratio = distance_ratio*distance_ratio*distance_ratio*distance_ratio;
+                        distance_ratio = distance_ratio*distance_ratio*distance_ratio;
                         list[i].HTMLElement.style.opacity = distance_ratio;
                     }
                 }
@@ -486,6 +509,8 @@ var CarPicsSpinnerAPI = (function() {
                     baseEvent.preventDefault();
                     if (thisObj.zoomed || thisObj.mouseDisabled) {
                         thisObj.mouseHold = false;
+                        thisObj.CurrentImage.clientX = undefined;
+                        thisObj.CurrentImage.clientY = undefined;
                         return;
                     }
                     // Display hotspots at mouseup event (after spinning), depending on current status.
@@ -503,7 +528,6 @@ var CarPicsSpinnerAPI = (function() {
                     thisObj.spinnerDiv.style.cursor = "-webkit-grab";
                     thisObj.spinnerDiv.style.cursor = "grab";
                     thisObj.spinnerDiv.style.cursor = "-moz-grab";
-                    
                 }
             })(this));
 
@@ -525,9 +549,7 @@ var CarPicsSpinnerAPI = (function() {
                             //return;
                         }
                         thisObj.CurrentImage.dragMove(baseEvent, 
-                            thisObj.CurrentImage.HTMLElement.getBoundingClientRect(), true, thisObj.lastXPosition, thisObj.lastYPosition);
-                        thisObj.lastXPosition = baseEvent.clientX;
-                        thisObj.lastYPosition = baseEvent.clientY;
+                            thisObj.CurrentImage.HTMLElement.getBoundingClientRect(), true);
                     } else if (thisObj.zoomed == false) {
                         while (thisObj.mouseXPosition - currentXPosition > thisObj.spinSensitivity){
                             // Hide hotspots during spinning
@@ -734,6 +756,10 @@ var CarPicsSpinnerAPI = (function() {
     */
     this.CarPicsImage = function(source, index, div, callback) {
         this.zoomIntensity =1;
+        this.velocityX = 0;
+        this.velocityY = 0;
+        this.currentX;
+        this.currentY;
         /*
         * Controls CSS to properly allow zoom functionality.
         */
@@ -783,33 +809,63 @@ var CarPicsSpinnerAPI = (function() {
             this.HTMLElement.style.left = correctX + 'px';
             this.HTMLElement.style.top = correctY + 'px';
         }
-        this.dragMove = function(baseEvent, offset, zoomed, originalX, originalY) {
-            var multiplier = 1;
+        /**
+        * Allows drag to scroll image within zoomed element
+        */
+        this.dragMove = function(baseEvent, offset, zoomed) {
             var parentOffset = this.HTMLElement.parentElement.getBoundingClientRect();
             var clientX = (baseEvent.type !== "touchmove" ? baseEvent.clientX : baseEvent.targetTouches[0].clientX) - parentOffset.left;
             var clientY = (baseEvent.type !== "touchmove" ? baseEvent.clientY : baseEvent.targetTouches[0].clientY) - parentOffset.top;
-            var shiftX = clientX - originalX;
-            var shiftY = clientY - originalY;
-            var correctX = offset.left + shiftX/multiplier;
-            var correctY =  offset.top + shiftY/multiplier;
-            // console.log('offset.left: ' + offset.left + ', offset.top: ' + offset.top);
-            // console.log('originalX: ' + originalX + ', originalY: ' + originalY);
-            // console.log('clientX: ' + clientX + ', clientY: ' + clientY);
-            // console.log('shiftX: ' + shiftX + ', shiftY: ' + shiftY);
-            console.log('correctX: ' + correctX + ', correctY: ' + correctY);
+            this.setVelocity(clientX, clientY);
+        }
+        this.setVelocity = function(Px, Py) {
+            var c = 0.6;    //how much each mouse movement matters 
+            if (typeof this.clientX == "undefined") {
+                this.clientX = Px;
+            }
+            if (typeof this.clientY == "undefined") {
+                this.clientY = Py;
+            }
+            this.velocityX = (Px-this.clientX) * c + this.velocityX;
+            this.velocityY = (Py-this.clientY) * c + this.velocityY;
+            this.clientX = Px;
+            this.clientY = Py;
+            this.moveTimeOut = this.moveTimeOut || setTimeout((function(thisObj) {
+                return function() {
+                    thisObj.inertialMove();
+                }  
+            })(this),10);
+        }
+        this.inertialMove = function () {
+            var decay = 0.8;    // how fast for decay, cannot be greater than 1
+            var threshold = 1;    // the threshold to stop the movement
+            var offset = this.HTMLElement.getBoundingClientRect();
+            var parentOffset = this.HTMLElement.parentElement.getBoundingClientRect();
+            var correctX = offset.left + this.velocityX - parentOffset.left;
+            var correctY =  offset.top + this.velocityY - parentOffset.top;
             if(correctX>0){
                 correctX=0;
-            } else if (-correctX > (multiplier*offset.width-parentOffset.width)) {
-                correctX = -(multiplier*offset.width-parentOffset.width);
+            } else if (-correctX > (offset.width-parentOffset.width)) {
+                correctX = -(offset.width-parentOffset.width);
             }
             if(correctY>0){
                 correctY=0;
-            } else if (-correctY > (multiplier*offset.height-parentOffset.height)) {
-                correctY = -(multiplier*offset.height-parentOffset.height);
+            } else if (-correctY > (offset.height-parentOffset.height)) {
+                correctY = -(offset.height-parentOffset.height);
             }
             this.HTMLElement.style.left = correctX + 'px';
             this.HTMLElement.style.top = correctY + 'px';
-
+            this.velocityX = this.velocityX * decay;
+            this.velocityY = this.velocityY * decay;
+            if (this.velocityX > threshold || this.velocityY > threshold) {
+                this.moveTimeOut = setTimeout((function(thisObj) {
+                    return function(){
+                        thisObj.inertialMove();
+                    }
+                })(this),10);
+            } else {
+                this.moveTimeOut = 0;
+            }
         }
         this.listOfPointsOfInterest = [];
         this.displayPointsOfInterest = function(source){
@@ -1248,10 +1304,11 @@ var CarPicsSpinnerAPI = (function() {
         var CarpicsDivs = document.getElementsByClassName("carPicsSpinner");
         var CarpicsDiv = CarpicsDivs[0];
         var buttonWrap = document.createElement("div");
+        buttonWrap.setAttribute("id", "buttonWrap");
         buttonWrap.style.position="absolute";
         buttonWrap.style.top= "40%";
         buttonWrap.style.right="6px";
-        buttonWrap.style.zIndex="20";
+        buttonWrap.style.zIndex="22";
         buttonWrap.style.opacity="0.8";
         CarpicsDiv.appendChild(buttonWrap);
         var zoomInButton = document.createElement("button");
@@ -1266,10 +1323,6 @@ var CarPicsSpinnerAPI = (function() {
         zoomInButton.onmouseover=(function(){
             zoomInButton.style.background="#888";
             zoomInButton.style.color="#fff";
-        });
-        zoomInButton.onmouseleave=(function(){
-            zoomInButton.style.background="#fff";
-            zoomInButton.style.color="#333";
         });
         zoomInButton.innerHTML="+";
         zoomInButton.style.fontSize="18px";
