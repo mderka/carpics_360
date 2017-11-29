@@ -91,12 +91,12 @@ var CarPicsSpinnerAPI = (function() {
         } else {
             this.spinDefault = false;
         }
-        if (config.displayHotspots == "false") {
+        if (config.displayHotspots === "false") {
             this.displayHotspots = false;
         } else {
             this.displayHotspots = true;
         }
-        if (config.enableInertialMove == "false") {
+        if (config.enableInertialMove === "false") {
             this.enableInertialMove = false;
         } else {
             this.enableInertialMove = true;
