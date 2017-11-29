@@ -1,12 +1,7 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html>
    <head>
-      <!-- <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
-      <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> -->
-      <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.8/esm/popper.min.js"></script> -->
-      <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script> -->
       <title>Car Pics 2.0 - 360 photos</title>
-      
    </head>
    <body style="background: url();">
       <style>
@@ -32,31 +27,10 @@
             margin: auto;  
             border: 2px solid #fff;
          }
-          .tooltip.top .tooltip-inner, 
-          .tooltip.right .tooltip-inner, 
-          .tooltip.bottom .tooltip-inner, 
-          .tooltip.left .tooltip-inner {
-            background-color: #EF255FAA;
-            color: #fff;
-            font-weight: 100;
-            letter-spacing: 1px;
-          }
-          .tooltip.top .tooltip-arrow{
-            border-top-color: #EF255FAA;
-          }
-          .tooltip.right .tooltip-arrow{
-            border-right-color: #EF255FAA;
-          }
-          .tooltip.bottom .tooltip-arrow{
-            border-bottom-color: #EF255FAA;
-          }
-          .tooltip.left .tooltip-arrow{
-            border-left-color: #EF255FAA;
-          }
       </style>
       <div style="height: 100vh; width: 100vw; background: url(../examples/background.png) no-repeat;background-size: 100% 100%; display: flex; align-items: center; justify-content: center;">
          <div style="width: 60vw;">
-            <div id="georgecarmichael" class="carPicsSpinner displayStyle" vin="MB360" dealer="001" style="position: relative; height: 40vw;">
+            <div id="georgecarmichael" class="carPicsSpinner displayStyle" vin="MB360" dealer="001" style="position: relative; height: 40vw;" displayHotspots="true">
             </div> 
             
             <div style="text-align: center; color: #fff; text-shadow: none; margin-top: 0.5em;">
@@ -67,7 +41,6 @@
             </div>
          </div>
       </div>
-
       <script type="text/javascript" src="../carpics_360v0.1.js" async="true"></script>
    </body>
 </html>
