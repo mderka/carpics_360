@@ -114,7 +114,7 @@ var CarPicsSpinnerAPI = (function() {
             this.loadSpinner();
         }
         // Set icon for hotspot_button
-        if (this.displayHotspots == true) {
+        if (this.displayHotspots === true) {
             document.getElementById("hotspot_button").innerHTML="&#8984";  //"&#8984" is the unicode for "place of interest"
         } else {
             document.getElementById("hotspot_button").innerHTML="&#8709";  //"&#8709" is the unicode for "empty set"
