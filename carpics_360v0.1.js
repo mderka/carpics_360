@@ -220,7 +220,8 @@ var CarPicsSpinnerAPI = (function() {
         */
         this.addImageAtCursor = function(nextIndex) {
             nextNext = this.LoadCursor.NextImage;
-            this.LoadCursor.NextImage = new CarPicsImage(this.data[nextIndex], nextIndex, this.divId, this.displayHotspots, this.getNextImage(this));
+            var nextData = this.data[nextIndex];
+            this.LoadCursor.NextImage = new CarPicsImage(nextData, nextIndex, this.divId, this.displayHotspots, this.getNextImage(this));
             this.spinnerDiv.appendChild(this.LoadCursor.NextImage.HTMLElement);
             if (this.LoadCursor.PreviousImage === this.LoadCursor) {
                 this.LoadCursor.PreviousImage = this.LoadCursor.NextImage;
