@@ -64,7 +64,7 @@ var CarPicsSpinnerAPI = (function() {
     /*
     * Spinner class.  One spinner div will correspond to one CarPicsSpinner. 
     */
-    this.CarPicsSpinner = function(config, data) {
+    var CarPicsSpinner = function(config, data) {
         this.StartTime = Date.now();
         this.connectionsFinished = 0;
         this.divId = config.divId;
@@ -775,7 +775,7 @@ var CarPicsSpinnerAPI = (function() {
     * CarPicsImage is a wrapper on functionality for the image container element.  
     * Contains image readiness information as well.
     */
-    this.CarPicsImage = function(source, index, div, displayHotspots, callback) {
+    var CarPicsImage = function(source, index, div, displayHotspots, callback) {
         this.zoomIntensity = 1;
         this.velocityX = 0;
         this.velocityY = 0;
