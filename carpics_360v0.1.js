@@ -26,7 +26,7 @@ var CarPicsSpinnerAPI = (function() {
         this.makeBoundGetRequest = function(config, thisObj) {
             return function() {
                 if(this.readyState==4 && this.status==200){
-                    thisObj.spinners[config.divId].spinner = new CarPicsSpinner(config, JSON.parse(this.responseText));
+                    thisObj.spinners[config.divId].spinner = new this.CarPicsSpinner(config, JSON.parse(this.responseText));
                     thisObj.spinners[config.divId].spinStatus = false;
                 }
             }
@@ -36,7 +36,7 @@ var CarPicsSpinnerAPI = (function() {
         */
         this.addSpinner = function(config, urlArray) {
             this.spinners[config.divId] = {
-                spinner: new CarPicsSpinner(config, urlArray),
+                spinner: new this.CarPicsSpinner(config, urlArray),
                 spinStatus: false
             };
         }
@@ -64,7 +64,7 @@ var CarPicsSpinnerAPI = (function() {
     /*
     * Spinner class.  One spinner div will correspond to one CarPicsSpinner. 
     */
-    var CarPicsSpinner = function(config, data) {
+    this.CarPicsSpinner = function(config, data) {
         this.StartTime = Date.now();
         this.connectionsFinished = 0;
         this.divId = config.divId;
@@ -221,7 +221,7 @@ var CarPicsSpinnerAPI = (function() {
         this.addImageAtCursor = function(nextIndex) {
             nextNext = this.LoadCursor.NextImage;
             var nextData = this.data[nextIndex];
-            this.LoadCursor.NextImage = new CarPicsImage(nextData, nextIndex, this.divId, this.displayHotspots, this.getNextImage(this));
+            this.LoadCursor.NextImage = new this.CarPicsImage(nextData, nextIndex, this.divId, this.displayHotspots, this.getNextImage(this));
             this.spinnerDiv.appendChild(this.LoadCursor.NextImage.HTMLElement);
             if (this.LoadCursor.PreviousImage === this.LoadCursor) {
                 this.LoadCursor.PreviousImage = this.LoadCursor.NextImage;
@@ -727,7 +727,7 @@ var CarPicsSpinnerAPI = (function() {
             this.spinnerDiv.style.cursor = "-moz-grab";
             this.spinnerDiv.style.overflow = "hidden";
         }
-        this.CurrentImage = new CarPicsImage(data[0], 0, this.divId, this.displayHotspots, function() {});
+        this.CurrentImage = new this.CarPicsImage(data[0], 0, this.divId, this.displayHotspots, function() {});
         this.CurrentImage.HTMLElement.style.display = "block";
         if (config.linear === "true") {
             this.LinearReference = {
@@ -775,7 +775,7 @@ var CarPicsSpinnerAPI = (function() {
     * CarPicsImage is a wrapper on functionality for the image container element.  
     * Contains image readiness information as well.
     */
-    var CarPicsImage = function(source, index, div, displayHotspots, callback) {
+    this.CarPicsImage = function(source, index, div, displayHotspots, callback) {
         this.zoomIntensity = 1;
         this.velocityX = 0;
         this.velocityY = 0;
