@@ -26,7 +26,7 @@ var CarPicsSpinnerAPI = (function() {
         this.makeBoundGetRequest = function(config, thisObj) {
             return function() {
                 if(this.readyState==4 && this.status==200){
-                    thisObj.spinners[config.divId].spinner = new this.CarPicsSpinner(config, JSON.parse(this.responseText));
+                    thisObj.spinners[config.divId].spinner = new CarPicsSpinner(config, JSON.parse(this.responseText));
                     thisObj.spinners[config.divId].spinStatus = false;
                 }
             }
@@ -36,7 +36,7 @@ var CarPicsSpinnerAPI = (function() {
         */
         this.addSpinner = function(config, urlArray) {
             this.spinners[config.divId] = {
-                spinner: new this.CarPicsSpinner(config, urlArray),
+                spinner: new CarPicsSpinner(config, urlArray),
                 spinStatus: false
             };
         }
@@ -115,9 +115,19 @@ var CarPicsSpinnerAPI = (function() {
         }
         // Set icon for hotspot_button
         if (this.displayHotspots === true) {
-            document.getElementById("hotspot_button").innerHTML="&#8984";  //"&#8984" is the unicode for "place of interest"
+            document.getElementById(this.divId+"hotspot_button").innerHTML="&#8984";  //"&#8984" is the unicode for "place of interest"
         } else {
-            document.getElementById("hotspot_button").innerHTML="&#8709";  //"&#8709" is the unicode for "empty set"
+            document.getElementById(this.divId+"hotspot_button").innerHTML="&#8709";  //"&#8709" is the unicode for "empty set"
+        }
+        if (config.displayDoorOpen === "true") {
+            this.displayDoorOpen = true;
+        } else {
+            this.displayDoorOpen = false;
+        }
+        if (this.displayDoorOpen === true) {
+            document.getElementById(this.divId+"door_open_button").innerHTML="O";  
+        } else {
+            document.getElementById(this.divId+"door_open_button").innerHTML="C";  
         }
         /*
         * Chooses the next image to load by halfing the distance from the current cursor to the next cursor.
@@ -221,7 +231,7 @@ var CarPicsSpinnerAPI = (function() {
         this.addImageAtCursor = function(nextIndex) {
             nextNext = this.LoadCursor.NextImage;
             var nextData = this.data[nextIndex];
-            this.LoadCursor.NextImage = new this.CarPicsImage(nextData, nextIndex, this.divId, this.displayHotspots, this.getNextImage(this));
+            this.LoadCursor.NextImage = new CarPicsImage(nextData, nextIndex, this.divId, this.displayHotspots, this.getNextImage(this));
             this.spinnerDiv.appendChild(this.LoadCursor.NextImage.HTMLElement);
             if (this.LoadCursor.PreviousImage === this.LoadCursor) {
                 this.LoadCursor.PreviousImage = this.LoadCursor.NextImage;
@@ -250,15 +260,15 @@ var CarPicsSpinnerAPI = (function() {
                 this.spinStatus = false;
                 this.zoomed = false;
                 // Set zoom in button style to be white background & black text when unzoomed (original style)
-                document.getElementById("zoom_in_button").style.background="#fff";
-                document.getElementById("zoom_in_button").style.color="#000";
+                document.getElementById(this.divId+"zoom_in_button").style.background="#fff";
+                document.getElementById(this.divId+"zoom_in_button").style.color="#000";
                 return true;
             } else if (!this.zoomed || this.multiZoom){
                 this.pauseMouseTime = Date.now() + 500;
                 this.zoomed = true;
                 // Set zoom in button style to be grey background & white text when zoomed (active style)
-                document.getElementById("zoom_in_button").style.background="#888";
-                document.getElementById("zoom_in_button").style.color="#fff";
+                document.getElementById(this.divId+"zoom_in_button").style.background="#888";
+                document.getElementById(this.divId+"zoom_in_button").style.color="#fff";
                 this.spinStatus = false;
                 this.CurrentImage.zoom(baseEvent);
                 return false;
@@ -402,7 +412,7 @@ var CarPicsSpinnerAPI = (function() {
             /*
             * Clicking on zoomin button triggers desktop zoom in event.
             */
-            document.getElementById("zoom_in_button").addEventListener("click", (function(thisObj) {
+            document.getElementById(this.divId+"zoom_in_button").addEventListener("click", (function(thisObj) {
                 return function(baseEvent) {
                     baseEvent.stopPropagation();
                     CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
@@ -418,24 +428,70 @@ var CarPicsSpinnerAPI = (function() {
                 }
             })(this));
 
-            document.getElementById("zoom_in_button").addEventListener("mouseleave", (function(thisObj) {
+            document.getElementById(this.divId+"zoom_in_button").addEventListener("mouseleave", (function(thisObj) {
                 return function(baseEvent) {
                     if (thisObj.zoomed == true) {
                         // if zoomed, keep the active style for zoom-in-button after hover
-                        document.getElementById("zoom_in_button").style.background="#888";
-                        document.getElementById("zoom_in_button").style.color="#fff";
+                        document.getElementById(thisObj.divId+"zoom_in_button").style.background="#888";
+                        document.getElementById(thisObj.divId+"zoom_in_button").style.color="#fff";
                     } else {
                         // if unzoomed, change the style for zoom-in-button to original after hover
-                        document.getElementById("zoom_in_button").style.background="#fff";
-                        document.getElementById("zoom_in_button").style.color="#000";
+                        document.getElementById(thisObj.divId+"zoom_in_button").style.background="#fff";
+                        document.getElementById(thisObj.divId+"zoom_in_button").style.color="#000";
                     }
+                }
+            })(this));
+
+            document.getElementById(this.divId+"zoom_in_button").addEventListener("mouseover", (function(thisObj) {
+                return function(baseEvent) {
+                    document.getElementById(thisObj.divId+"zoom_in_button").style.background="#888";
+                    document.getElementById(thisObj.divId+"zoom_in_button").style.color="#fff";
+                }
+            })(this));
+
+            document.getElementById(this.divId+"zoom_out_button").addEventListener("mouseover", (function(thisObj) {
+                return function(baseEvent) {
+                    document.getElementById(thisObj.divId+"zoom_out_button").style.background="#888";
+                    document.getElementById(thisObj.divId+"zoom_out_button").style.color="#fff";
+                }
+            })(this));
+            document.getElementById(this.divId+"zoom_out_button").addEventListener("mouseleave", (function(thisObj) {
+                return function(baseEvent) {
+                    document.getElementById(thisObj.divId+"zoom_out_button").style.background="#fff";
+                    document.getElementById(thisObj.divId+"zoom_out_button").style.color="#000";
+                }
+            })(this));
+
+            document.getElementById(this.divId+"hotspot_button").addEventListener("mouseover", (function(thisObj) {
+                return function(baseEvent) {
+                    document.getElementById(thisObj.divId+"hotspot_button").style.background="#888";
+                    document.getElementById(thisObj.divId+"hotspot_button").style.color="#fff";
+                }
+            })(this));
+            document.getElementById(this.divId+"hotspot_button").addEventListener("mouseleave", (function(thisObj) {
+                return function(baseEvent) {
+                    document.getElementById(thisObj.divId+"hotspot_button").style.background="#fff";
+                    document.getElementById(thisObj.divId+"hotspot_button").style.color="#000";
+                }
+            })(this));
+
+            document.getElementById(this.divId+"door_open_button").addEventListener("mouseover", (function(thisObj) {
+                return function(baseEvent) {
+                    document.getElementById(thisObj.divId+"door_open_button").style.background="#888";
+                    document.getElementById(thisObj.divId+"door_open_button").style.color="#fff";
+                }
+            })(this));
+            document.getElementById(this.divId+"door_open_button").addEventListener("mouseleave", (function(thisObj) {
+                return function(baseEvent) {
+                    document.getElementById(thisObj.divId+"door_open_button").style.background="#fff";
+                    document.getElementById(thisObj.divId+"door_open_button").style.color="#000";
                 }
             })(this));
 
             /*
             * Clicking on zoomout button triggers desktop zoom out event.
             */
-            document.getElementById("zoom_out_button").addEventListener("click", (function(thisObj) {
+            document.getElementById(this.divId+"zoom_out_button").addEventListener("click", (function(thisObj) {
                 return function(baseEvent) {
                     baseEvent.stopPropagation();
                     CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
@@ -454,27 +510,51 @@ var CarPicsSpinnerAPI = (function() {
             /*
             * Clicking on hotspot button triggers display/hide hotspots
             */
-            document.getElementById("hotspot_button").addEventListener("click", (function(thisObj) {
+            document.getElementById(this.divId+"hotspot_button").addEventListener("click", (function(thisObj) {
                 return function(baseEvent) {
                     baseEvent.stopPropagation();
                     CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
                     baseEvent.preventDefault();
                     if (thisObj.displayHotspots == true) {
                         // hide hotspots
-                        var hotspots = document.getElementsByClassName("hotspot");
+                        var currentDiv = document.getElementById(thisObj.divId);
+                        var hotspots = currentDiv.getElementsByClassName("hotspot");
                         for (var i = 0; i < hotspots.length; i++) {
                             hotspots[i].style.display = "none";
                         }
                         thisObj.displayHotspots = false;
-                        document.getElementById("hotspot_button").innerHTML="&#8709";// &#8709 is the unicode for 'empty set'
+                        document.getElementById(thisObj.divId+"hotspot_button").innerHTML="&#8709";// &#8709 is the unicode for 'empty set'
                     } else {
                         // display hotspots
-                        var hotspots = document.getElementsByClassName("hotspot");
+                        var currentDiv = document.getElementById(thisObj.divId);
+                        var hotspots = currentDiv.getElementsByClassName("hotspot");
                         for (var i = 0; i < hotspots.length; i++) {
                             hotspots[i].style.display = "block";
                         }
                         thisObj.displayHotspots = true;
-                        document.getElementById("hotspot_button").innerHTML="&#8984";// &#8984 is the unicode for 'place of interset sign'
+                        document.getElementById(thisObj.divId+"hotspot_button").innerHTML="&#8984";// &#8984 is the unicode for 'place of interset sign'
+                    }
+                }
+            })(this));
+
+            /*
+            * Clicking on door_open_button triggers displaying door_open_spinner
+            */
+            document.getElementById(this.divId+"door_open_button").addEventListener("click", (function(thisObj) {
+                return function(baseEvent) {
+                    baseEvent.stopPropagation();
+                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
+                    baseEvent.preventDefault();
+                    if (thisObj.displayDoorOpen == true) {
+                        // display door closed spinner
+                        
+                        thisObj.displayDoorOpen = false;
+                        document.getElementById(thisObj.divId+"door_open_button").innerHTML="C";
+                    } else {
+                        // display door opened spinner
+                        
+                        thisObj.displayDoorOpen = true;
+                        document.getElementById(thisObj.divId+"door_open_button").innerHTML="O";
                     }
                 }
             })(this));
@@ -482,7 +562,7 @@ var CarPicsSpinnerAPI = (function() {
             /*
             * Prevent double click on buttons
             */
-            document.getElementById("buttonWrap").addEventListener("dblclick", (function(thisObj) {
+            document.getElementById(this.divId+"buttonWrap").addEventListener("dblclick", (function(thisObj) {
                 return function(baseEvent) {
                     baseEvent.stopPropagation();
                     CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Doubleclick'});
@@ -575,14 +655,15 @@ var CarPicsSpinnerAPI = (function() {
                         while (thisObj.mouseXPosition - currentXPosition > thisObj.spinSensitivity){
                             // Hide hotspots during spinning
                             if ( thisObj.displayHotspots== true ) {
-                                var hotspots = document.getElementsByClassName("hotspot");
+                                var currentDiv = document.getElementById(thisObj.divId);
+                                var hotspots = currentDiv.getElementsByClassName("hotspot");
                                 while (hotspots.length > 0) {
                                     hotspots[0].parentElement.removeChild(hotspots[0]);
                                 }
                             }
                             // If spinning was triggered inside a hotspot, remove modalHover
-                            if (document.getElementById("modalHover")) {
-                                var modalHover = document.getElementById("modalHover");
+                            if (document.getElementById(thisObj.divId+"modalHover")) {
+                                var modalHover = document.getElementById(thisObj.divId+"modalHover");
                                 modalHover.parentElement.removeChild(modalHover);
                             }
                             thisObj.turning = true;
@@ -593,14 +674,15 @@ var CarPicsSpinnerAPI = (function() {
                         while (currentXPosition - thisObj.mouseXPosition > thisObj.spinSensitivity) {
                             // Hide hotspots during spinning
                             if ( thisObj.displayHotspots== true ) {
-                                var hotspots = document.getElementsByClassName("hotspot");
+                                var currentDiv = document.getElementById(thisObj.divId);
+                                var hotspots = currentDiv.getElementsByClassName("hotspot");
                                 while (hotspots.length > 0) {
                                     hotspots[0].parentElement.removeChild(hotspots[0]);
                                 }
                             }
                             // If spinning was triggered inside a hotspot, remove modalHover
-                            if (document.getElementById("modalHover")) {
-                                var modalHover = document.getElementById("modalHover");
+                            if (document.getElementById(thisObj.divId+"modalHover")) {
+                                var modalHover = document.getElementById(thisObj.divId+"modalHover");
                                 modalHover.parentElement.removeChild(modalHover);
                             }
                             thisObj.turning = true;
@@ -727,7 +809,7 @@ var CarPicsSpinnerAPI = (function() {
             this.spinnerDiv.style.cursor = "-moz-grab";
             this.spinnerDiv.style.overflow = "hidden";
         }
-        this.CurrentImage = new this.CarPicsImage(data[0], 0, this.divId, this.displayHotspots, function() {});
+        this.CurrentImage = new CarPicsImage(data[0], 0, this.divId, this.displayHotspots, function() {});
         this.CurrentImage.HTMLElement.style.display = "block";
         if (config.linear === "true") {
             this.LinearReference = {
@@ -910,7 +992,7 @@ var CarPicsSpinnerAPI = (function() {
             }
         }
         this.listOfPointsOfInterest = [];
-        this.displayPointsOfInterest = function(source, displayHotspots){
+        this.displayPointsOfInterest = function(source, displayHotspots, divId){
             if(typeof source.poi == "undefined"){
                 return;
             }
@@ -953,7 +1035,7 @@ var CarPicsSpinnerAPI = (function() {
                         var modal = document.createElement("div");
                         modal.style.fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif";
                         modal.style.lineHeight="1.414";
-                        modal.setAttribute("id", "modalHover");
+                        modal.setAttribute("id", divId+"modalHover");
                         modal.style.position="absolute";
                         modal.style.margin="auto";
                         // Adjust the position of modal based on the position of hotspot in CarPicsSpinnerDiv
@@ -1059,7 +1141,7 @@ var CarPicsSpinnerAPI = (function() {
                 // remove small detail modal after hover (on mouse leave)
                 div.onmouseout = (function(){
                     return function(){
-                        document.getElementById("modalHover").remove();
+                        document.getElementById(divId+"modalHover").remove();
                     }
                 })(this.HTMLElement, poi[i]);
                 // // Display full detail modal when click on hotspot
@@ -1070,7 +1152,7 @@ var CarPicsSpinnerAPI = (function() {
                         // Create a overlay to display modal
                         var overlay = document.createElement("div");
                         overlay.style.fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif";
-                        overlay.setAttribute("id", "popModalContainer");
+                        overlay.setAttribute("id", divId+"popModalContainer");
                         overlay.style.position="absolute";
                         overlay.style.width="100%";
                         overlay.style.height="100%";
@@ -1078,19 +1160,19 @@ var CarPicsSpinnerAPI = (function() {
                         overlay.style.background="#00000088";  // make the overlay transparent with a little bit grey
                         element.style["-webkit-filter"]="blur(10px)";  // Blur backgound when display modal
                         element.parentElement.insertBefore(overlay,element);
-                        document.getElementById("buttonWrap").style.opacity = 0;  // Hide control buttons when displaying modal
+                        // document.getElementById("buttonWrap").style.opacity = 0;  // Hide control buttons when displaying modal
                         // close modal when user click outside modal
                         overlay.onclick = (function(e){
-                            if(e.target.id=="popModalContainer"){
-                                document.getElementById("popModalContainer").remove();
+                            if(e.target.id==divId+"popModalContainer"){
+                                document.getElementById(divId+"popModalContainer").remove();
                                 element.style["-webkit-filter"]="none";
-                                document.getElementById("buttonWrap").style.opacity = 0.8;  // Display control buttons
+                                document.getElementById(divId+"buttonWrap").style.opacity = 0.8;  // Display control buttons
                             }
                         });
                         // Create full detail modal
                         var modal = document.createElement("div");
                         modal.style.lineHeight="1.414";
-                        modal.setAttribute("id", "popModal");
+                        modal.setAttribute("id", divId+"popModal");
                         modal.style.width="60%";
                         modal.style.maxHeight="85%";
                         modal.style.margin="5% auto 5% auto";
@@ -1342,7 +1424,7 @@ var CarPicsSpinnerAPI = (function() {
         this.imgElement = document.createElement("img");
         this.HTMLElement = document.createElement("div");
         this.HTMLElement.appendChild(this.imgElement);
-        this.displayPointsOfInterest(source, displayHotspots);
+        this.displayPointsOfInterest(source, displayHotspots, div);
         this.setDefaultImageStyles();
         this.imgElement.setAttribute("src", "http://cdn.carpics2p0.com/" + source.src);
         this.HTMLElement.setAttribute("id", this.elementId);
@@ -1367,14 +1449,50 @@ var CarPicsSpinnerAPI = (function() {
         var CarpicsDivs = document.getElementsByClassName("carPicsSpinner");
         for (var i = 0; i < CarpicsDivs.length; i++) {
             var div = CarpicsDivs[i];
+            spinners.push({
+                numberOfConnections: div.getAttribute("numberOfConnections"),
+                autospin: div.getAttribute("autospin"),
+                autospinDirection: div.getAttribute("autospinDirection") == "left" ? -1 : 1,
+                spinOnLoad: div.getAttribute("spinOnLoad"),
+                divId: div.getAttribute("id"),
+                sourceURL: "http://feed.carpics2p0.com/rest/spinner/s3?dealer="+div.getAttribute("dealer")
+                +"&vin=" + div.getAttribute("vin"),
+                autospinSleep: div.getAttribute("autospinSleep"),
+                spinSensitivity: div.getAttribute("spinSensitivity"),
+                disableMouse: div.getAttribute("disableMouse"),
+                displayHotspots: div.getAttribute("displayHotspots"),
+                displayDoorOpen: div.getAttribute("displayDoorOpen"),
+                enableInertialMove: div.getAttribute("enableInertialMove"),
+                overrideSize: {
+                    overrideWidth: div.getAttribute("overrideWidth"),
+                    overrideHeight: div.getAttribute("overrideHeight")
+                },
+                overlaySource:div.getAttribute("overlaySource")
+            });
+            var divId = spinners[i].divId;
             var buttonWrap = document.createElement("div");
-            buttonWrap.setAttribute("id", "buttonWrap");
+            buttonWrap.setAttribute("id", divId+"buttonWrap");
             buttonWrap.style.position="absolute";
             buttonWrap.style.top= "40%";
             buttonWrap.style.right="6px";
             buttonWrap.style.zIndex="22";
             buttonWrap.style.opacity="0.8";
             div.appendChild(buttonWrap);
+            // Create door_open_button for CarPicsSpinnerDiv
+            var doorOpenButton = document.createElement("button");
+            doorOpenButton.style.height="28px";
+            doorOpenButton.style.width="28px";
+            doorOpenButton.style.border="none";
+            doorOpenButton.style.borderRadius="4px";
+            doorOpenButton.style.background="#fff";   // button original style - white background
+            doorOpenButton.style.color="#000";    // button original style - black text color
+            doorOpenButton.style.margin="4px 0";
+            doorOpenButton.style.cursor="pointer";
+            doorOpenButton.setAttribute("id", divId+"door_open_button");
+            doorOpenButton.style.fontSize="18px";
+            doorOpenButton.style.fontWeight="600";
+            buttonWrap.appendChild(doorOpenButton);
+            buttonWrap.appendChild(document.createElement("br"));
             // Create zoom-in-button for CarPicsSpinnerDiv
             var zoomInButton = document.createElement("button");
             zoomInButton.style.height="28px";
@@ -1385,11 +1503,7 @@ var CarPicsSpinnerAPI = (function() {
             zoomInButton.style.color="#000";    // button original style - black text color
             zoomInButton.style.margin="4px 0";
             zoomInButton.style.cursor="pointer";
-            zoomInButton.setAttribute("id", "zoom_in_button");
-            zoomInButton.onmouseover=(function(){
-                zoomInButton.style.background="#888";   // button active style - grey background
-                zoomInButton.style.color="#fff";    // button active style - white text color
-            });
+            zoomInButton.setAttribute("id", divId+"zoom_in_button");
             zoomInButton.innerHTML="+";
             zoomInButton.style.fontSize="18px";
             zoomInButton.style.fontWeight="600";
@@ -1405,15 +1519,7 @@ var CarPicsSpinnerAPI = (function() {
             zoomOutButton.style.color="#000";    // button original style - black text color
             zoomOutButton.style.margin="4px 0";
             zoomOutButton.style.cursor="pointer";
-            zoomOutButton.setAttribute("id", "zoom_out_button");
-            zoomOutButton.onmouseover=(function(){
-                zoomOutButton.style.background="#888";   // button active style - grey background
-                zoomOutButton.style.color="#fff";    // button active style - white text color
-            });
-            zoomOutButton.onmouseleave=(function(){
-                zoomOutButton.style.background="#fff";   // button original style - white background
-                zoomOutButton.style.color="#000";    // button original style - black text color
-            });
+            zoomOutButton.setAttribute("id", divId+"zoom_out_button");
             zoomOutButton.innerHTML="-";
             zoomOutButton.style.fontSize="18px";
             zoomOutButton.style.fontWeight="600";
@@ -1429,37 +1535,10 @@ var CarPicsSpinnerAPI = (function() {
             hotspotButton.style.color="#000";    // button original style - black text color
             hotspotButton.style.margin="4px 0";
             hotspotButton.style.cursor="pointer";
-            hotspotButton.setAttribute("id", "hotspot_button");
-            hotspotButton.onmouseover=(function(){
-                hotspotButton.style.background="#888";   // button active style - grey background
-                hotspotButton.style.color="#fff";    // button active style - white text color
-            });
-            hotspotButton.onmouseleave=(function(){
-                hotspotButton.style.background="#fff";   // button original style - white background
-                hotspotButton.style.color="#000";    // button original style - black text color
-            });
+            hotspotButton.setAttribute("id", divId+"hotspot_button");
             hotspotButton.style.fontSize="14px";
             hotspotButton.style.fontWeight="600";
             buttonWrap.appendChild(hotspotButton);
-            spinners.push({
-                numberOfConnections: div.getAttribute("numberOfConnections"),
-                autospin: div.getAttribute("autospin"),
-                autospinDirection: div.getAttribute("autospinDirection") == "left" ? -1 : 1,
-                spinOnLoad: div.getAttribute("spinOnLoad"),
-                divId: div.getAttribute("id"),
-                sourceURL: "http://feed.carpics2p0.com/rest/spinner/s3?dealer="+div.getAttribute("dealer")
-                +"&vin=" + div.getAttribute("vin"),
-                autospinSleep: div.getAttribute("autospinSleep"),
-                spinSensitivity: div.getAttribute("spinSensitivity"),
-                disableMouse: div.getAttribute("disableMouse"),
-                displayHotspots: div.getAttribute("displayHotspots"),
-                enableInertialMove: div.getAttribute("enableInertialMove"),
-                overrideSize: {
-                    overrideWidth: div.getAttribute("overrideWidth"),
-                    overrideHeight: div.getAttribute("overrideHeight")
-                },
-                overlaySource:div.getAttribute("overlaySource")
-            });
         }
         var Spinners = new CarPicsSpinnerAPI.CarPicsSpinners({
             spinners: spinners
