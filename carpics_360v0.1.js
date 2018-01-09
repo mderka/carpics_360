@@ -26,7 +26,8 @@ var CarPicsSpinnerAPI = (function() {
         this.makeBoundGetRequest = function(config, thisObj) {
             return function() {
                 if(this.readyState==4 && this.status==200){
-                    thisObj.spinners[config.divId].spinner = new CarPicsSpinner(config, JSON.parse(this.responseText));
+                    var temp = [{"poi":[{"cacheKey":"SpinTest/Ready/autostamp/used/MB360_A_B_C_D_E/0039.jpg","yposition":34.8845,"xposition":43.4593,"x":43.4593,"y":34.8845,"name":"Feel like a driver","notes":"Feel like a driver!","sourceUrl":"https://s3-us-west-2.amazonaws.com/cdn.carpics2p0.com/Mercedes-Benz_Corporate/Ready/autostamp/used/WDC0G4KB7HF229537_XN17754862_2017_Mercedes-Benz_GLC-Class_USED/WDC0G4KB7HF229537_XN17754862_2017_Mercedes-Benz_GLC-Class_USED-07.jpg","type":"Feature"},{"cacheKey":"SpinTest/Ready/autostamp/used/MB360_A_B_C_D_E/0039.jpg","yposition":68.9417,"xposition":35.0202,"x":35.0202,"y":68.9417,"name":"Small dent","notes":"small dent here!","sourceUrl":"","type":"Damage"}],"file_id":0,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0171.jpg"},{"poi":[],"file_id":1,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0191.jpg"},{"poi":[],"file_id":2,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0209.jpg"},{"poi":[],"file_id":3,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0231.jpg"},{"poi":[],"file_id":4,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0251.jpg"},{"poi":[],"file_id":5,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0271.jpg"},{"poi":[],"file_id":6,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0290.jpg"},{"poi":[],"file_id":7,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0310.jpg"},{"poi":[],"file_id":8,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0329.jpg"},{"poi":[],"file_id":9,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0349.jpg"},{"poi":[],"file_id":10,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0369.jpg"},{"poi":[],"file_id":11,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0391.jpg"},{"poi":[],"file_id":12,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0409.jpg"},{"poi":[],"file_id":13,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0429.jpg"},{"poi":[],"file_id":14,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0451.jpg"},{"poi":[],"file_id":15,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0469.jpg"},{"poi":[],"file_id":16,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0489.jpg"},{"poi":[],"file_id":17,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0511.jpg"},{"poi":[],"file_id":18,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0531.jpg"},{"poi":[],"file_id":19,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0551.jpg"},{"poi":[],"file_id":20,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0571.jpg"},{"poi":[],"file_id":21,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0591.jpg"},{"poi":[],"file_id":22,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0612.jpg"},{"poi":[],"file_id":23,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0631.jpg"},{"poi":[],"file_id":24,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0651.jpg"},{"poi":[],"file_id":25,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0671.jpg"},{"poi":[],"file_id":26,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0691.jpg"},{"poi":[],"file_id":27,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0711.jpg"},{"poi":[],"file_id":28,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0728.jpg"},{"poi":[],"file_id":29,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0750.jpg"},{"poi":[],"file_id":30,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0771.jpg"},{"poi":[],"file_id":31,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0791.jpg"},{"poi":[],"file_id":32,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0811.jpg"},{"poi":[],"file_id":33,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0831.jpg"},{"poi":[],"file_id":34,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0850.jpg"},{"poi":[],"file_id":35,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0871.jpg"},{"poi":[],"file_id":36,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0890.jpg"},{"poi":[],"file_id":37,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0912.jpg"},{"poi":[],"file_id":38,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0930.jpg"},{"poi":[],"file_id":39,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0949.jpg"},{"poi":[],"file_id":40,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0969.jpg"},{"poi":[],"file_id":41,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_0991.jpg"},{"poi":[],"file_id":42,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1009.jpg"},{"poi":[],"file_id":43,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1029.jpg"},{"poi":[],"file_id":44,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1049.jpg"},{"poi":[],"file_id":45,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1069.jpg"},{"poi":[],"file_id":46,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1089.jpg"},{"poi":[],"file_id":47,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1109.jpg"},{"poi":[],"file_id":48,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1129.jpg"},{"poi":[],"file_id":49,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1149.jpg"},{"poi":[],"file_id":50,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1171.jpg"},{"poi":[],"file_id":51,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1188.jpg"},{"poi":[],"file_id":52,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1212.jpg"},{"poi":[],"file_id":53,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1228.jpg"},{"poi":[],"file_id":54,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1248.jpg"},{"poi":[],"file_id":55,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1271.jpg"},{"poi":[],"file_id":56,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1291.jpg"},{"poi":[],"file_id":57,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1311.jpg"},{"poi":[],"file_id":58,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1331.jpg"},{"poi":[],"file_id":59,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1351.jpg"},{"poi":[],"file_id":60,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1371.jpg"},{"poi":[],"file_id":61,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1391.jpg"},{"poi":[],"file_id":62,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1411.jpg"},{"poi":[],"file_id":63,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1431.jpg"},{"poi":[],"file_id":64,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1451.jpg"},{"poi":[],"file_id":65,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1471.jpg"},{"poi":[],"file_id":66,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1491.jpg"},{"poi":[],"file_id":67,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1509.jpg"},{"poi":[],"file_id":68,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1529.jpg"},{"poi":[],"file_id":69,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1549.jpg"},{"poi":[],"file_id":70,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1569.jpg"},{"poi":[],"file_id":71,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1589.jpg"},{"poi":[],"file_id":72,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1609.jpg"},{"poi":[],"file_id":73,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1629.jpg"},{"poi":[],"file_id":74,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1650.jpg"},{"poi":[],"file_id":75,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1672.jpg"},{"poi":[],"file_id":76,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1690.jpg"},{"poi":[],"file_id":77,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1710.jpg"},{"poi":[],"file_id":78,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1732.jpg"},{"poi":[],"file_id":79,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1751.jpg"},{"poi":[],"file_id":80,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1768.jpg"},{"poi":[],"file_id":81,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1790.jpg"},{"poi":[],"file_id":82,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1809.jpg"},{"poi":[],"file_id":83,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1830.jpg"},{"poi":[],"file_id":84,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1852.jpg"},{"poi":[],"file_id":85,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1868.jpg"},{"poi":[],"file_id":86,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1890.jpg"},{"poi":[],"file_id":87,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1910.jpg"},{"poi":[],"file_id":88,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1930.jpg"},{"poi":[],"file_id":89,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1950.jpg"},{"poi":[],"file_id":90,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1970.jpg"},{"poi":[],"file_id":91,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_1990.jpg"},{"poi":[],"file_id":92,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2010.jpg"},{"poi":[],"file_id":93,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2029.jpg"},{"poi":[],"file_id":94,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2049.jpg"},{"poi":[],"file_id":95,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2069.jpg"},{"poi":[],"file_id":96,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2089.jpg"},{"poi":[],"file_id":97,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2108.jpg"},{"poi":[],"file_id":98,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2131.jpg"},{"poi":[],"file_id":99,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2151.jpg"},{"poi":[],"file_id":100,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2170.jpg"},{"poi":[],"file_id":101,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2190.jpg"},{"poi":[],"file_id":102,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2208.jpg"},{"poi":[],"file_id":103,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2232.jpg"},{"poi":[],"file_id":104,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2251.jpg"},{"poi":[],"file_id":105,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2271.jpg"},{"poi":[],"file_id":106,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2292.jpg"},{"poi":[],"file_id":107,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2310.jpg"},{"poi":[],"file_id":108,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2329.jpg"},{"poi":[],"file_id":109,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2348.jpg"},{"poi":[],"file_id":110,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2370.jpg"},{"poi":[],"file_id":111,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2391.jpg"},{"poi":[],"file_id":112,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2411.jpg"},{"poi":[],"file_id":113,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2430.jpg"},{"poi":[],"file_id":114,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2451.jpg"},{"poi":[],"file_id":115,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2471.jpg"},{"poi":[],"file_id":116,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2491.jpg"},{"poi":[],"file_id":117,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2509.jpg"},{"poi":[],"file_id":118,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2529.jpg"},{"poi":[],"file_id":119,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2549.jpg"},{"poi":[],"file_id":120,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2569.jpg"},{"poi":[],"file_id":121,"src":"SpinTest/Ready/autostamp/used/1_A_2017_Vv_Ccv_New/frame_2589.jpg"}];
+                    thisObj.spinners[config.divId].spinner = new CarPicsSpinner(config, [JSON.parse(this.responseText),temp]);
                     thisObj.spinners[config.divId].spinStatus = false;
                 }
             }
@@ -73,6 +74,7 @@ var CarPicsSpinnerAPI = (function() {
             this.insertPlaceholder();
             return;
         }
+        this.imageSetIndex = 0; // 0 - door closed; 1 - door opened
         this.data = data;
         this.numberOfConnections = config.numberOfConnections > 0 ? config.numberOfConnections : 4;
         this.AllLoded = false;
@@ -230,7 +232,7 @@ var CarPicsSpinnerAPI = (function() {
         */
         this.addImageAtCursor = function(nextIndex) {
             nextNext = this.LoadCursor.NextImage;
-            var nextData = this.data[nextIndex];
+            var nextData = this.data[this.imageSetIndex][nextIndex];
             this.LoadCursor.NextImage = new CarPicsImage(nextData, nextIndex, this.divId, this.displayHotspots, this.getNextImage(this));
             this.spinnerDiv.appendChild(this.LoadCursor.NextImage.HTMLElement);
             if (this.LoadCursor.PreviousImage === this.LoadCursor) {
@@ -545,14 +547,119 @@ var CarPicsSpinnerAPI = (function() {
                     baseEvent.stopPropagation();
                     CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
                     baseEvent.preventDefault();
+                    thisObj.spinnerDiv = document.getElementById(thisObj.divId);
                     if (thisObj.displayDoorOpen == true) {
                         // display door closed spinner
-                        
+                        thisObj.imageSetIndex = 0;
+                        while (thisObj.spinnerDiv.childNodes.length > 2) {
+                            thisObj.spinnerDiv.removeChild(thisObj.spinnerDiv.lastChild);
+                        }
+                        thisObj.setDefaultSpinnerStyles = function() {
+                            thisObj.spinnerDiv.style.cursor = "grab";
+                            thisObj.spinnerDiv.style.cursor = "-webkit-grab";
+                            thisObj.spinnerDiv.style.cursor = "-moz-grab";
+                            thisObj.spinnerDiv.style.overflow = "hidden";
+                        }
+                        thisObj.CurrentImage = new CarPicsImage(data[thisObj.imageSetIndex][0], 0, thisObj.divId, thisObj.displayHotspots, function() {});
+                        thisObj.CurrentImage.HTMLElement.style.display = "block";
+                        if (config.linear === "true") {
+                            thisObj.LinearReference = {
+                                nextLeft: false,
+                                goLeft: function() {
+                                    thisObj.nextLeft = !thisObj.nextLeft;
+                                    return thisObj.nextLeft;
+                                }
+                            }
+                        }
+                        thisObj.AllImages = new Array(data[thisObj.imageSetIndex].length);
+                        thisObj.AllImages[0] = thisObj.CurrentImage;
+                        thisObj.LoadCursor = thisObj.CurrentImage;
+                        if (!thisObj.mouseDisabled) {
+                            thisObj.setDefaultSpinnerStyles();
+                        }
+                        thisObj.spinnerDiv.appendChild(thisObj.CurrentImage.HTMLElement);
+                        if (thisObj.spinStatus) {
+                            setInterval((function(thisObj) {
+                                return function() {
+                                    if (!thisObj.spinStatus) return;
+                                    thisObj.displayNextImage()
+                                }
+                            })(thisObj), thisObj.autospinSleep);
+                        }
+                        if (config.spinOnLoad == "true") {
+                            thisObj.AllLoadedFunctions.push((function(thisObj) {
+                                return function() {
+                                    thisObj.spinStatus = 1;
+                                    thisObj.spinDefault = 1;
+                                    setInterval((function(thisObj) {
+                                        return function() {
+                                            if (!thisObj.spinStatus) return;
+                                            thisObj.displayNextImage()
+                                        }
+                                    })(thisObj), thisObj.autospinSleep);
+                                }
+                            })(thisObj))
+                        }
+                        for (var i = 0; i < thisObj.numberOfConnections; i++) {
+                            thisObj.getNextImage(thisObj, undefined)();
+                        }
                         thisObj.displayDoorOpen = false;
                         document.getElementById(thisObj.divId+"door_open_button").innerHTML="C";
                     } else {
                         // display door opened spinner
-                        
+                        thisObj.imageSetIndex = 1;
+                        while (thisObj.spinnerDiv.childNodes.length > 2) {
+                            thisObj.spinnerDiv.removeChild(thisObj.spinnerDiv.lastChild);
+                        }
+                        thisObj.setDefaultSpinnerStyles = function() {
+                            thisObj.spinnerDiv.style.cursor = "grab";
+                            thisObj.spinnerDiv.style.cursor = "-webkit-grab";
+                            thisObj.spinnerDiv.style.cursor = "-moz-grab";
+                            thisObj.spinnerDiv.style.overflow = "hidden";
+                        }
+                        thisObj.CurrentImage = new CarPicsImage(data[thisObj.imageSetIndex][0], 0, thisObj.divId, thisObj.displayHotspots, function() {});
+                        thisObj.CurrentImage.HTMLElement.style.display = "block";
+                        if (config.linear === "true") {
+                            thisObj.LinearReference = {
+                                nextLeft: false,
+                                goLeft: function() {
+                                    thisObj.nextLeft = !thisObj.nextLeft;
+                                    return thisObj.nextLeft;
+                                }
+                            }
+                        }
+                        thisObj.AllImages = new Array(data[thisObj.imageSetIndex].length);
+                        thisObj.AllImages[0] = thisObj.CurrentImage;
+                        thisObj.LoadCursor = thisObj.CurrentImage;
+                        if (!thisObj.mouseDisabled) {
+                            thisObj.setDefaultSpinnerStyles();
+                        }
+                        thisObj.spinnerDiv.appendChild(thisObj.CurrentImage.HTMLElement);
+                        if (thisObj.spinStatus) {
+                            setInterval((function(thisObj) {
+                                return function() {
+                                    if (!thisObj.spinStatus) return;
+                                    thisObj.displayNextImage()
+                                }
+                            })(thisObj), thisObj.autospinSleep);
+                        }
+                        if (config.spinOnLoad == "true") {
+                            thisObj.AllLoadedFunctions.push((function(thisObj) {
+                                return function() {
+                                    thisObj.spinStatus = 1;
+                                    thisObj.spinDefault = 1;
+                                    setInterval((function(thisObj) {
+                                        return function() {
+                                            if (!thisObj.spinStatus) return;
+                                            thisObj.displayNextImage()
+                                        }
+                                    })(thisObj), thisObj.autospinSleep);
+                                }
+                            })(thisObj))
+                        }
+                        for (var i = 0; i < thisObj.numberOfConnections; i++) {
+                            thisObj.getNextImage(thisObj, undefined)();
+                        }
                         thisObj.displayDoorOpen = true;
                         document.getElementById(thisObj.divId+"door_open_button").innerHTML="O";
                     }
@@ -610,10 +717,12 @@ var CarPicsSpinnerAPI = (function() {
                     // Display hotspots at mouseup event (after spinning), depending on current status.
                     if (thisObj.displayHotspots&&thisObj.turning) {
                         for (var j=0; j<thisObj.AllImages.length; j++) {
-                            var list = thisObj.AllImages[j].getPointsOfInterest();
-                            for (var i=0; i<list.length; i++) {
-                                thisObj.AllImages[j].HTMLElement.appendChild(list[i].HTMLElement);
-                            }
+                            if (typeof thisObj.AllImages[j] !== 'undefined') {
+                                var list = thisObj.AllImages[j].getPointsOfInterest();
+                                for (var i=0; i<list.length; i++) {
+                                    thisObj.AllImages[j].HTMLElement.appendChild(list[i].HTMLElement);
+                                }
+                            }   
                         }
                     }
                     thisObj.spinStatus = thisObj.spinDefault;
@@ -809,7 +918,7 @@ var CarPicsSpinnerAPI = (function() {
             this.spinnerDiv.style.cursor = "-moz-grab";
             this.spinnerDiv.style.overflow = "hidden";
         }
-        this.CurrentImage = new CarPicsImage(data[0], 0, this.divId, this.displayHotspots, function() {});
+        this.CurrentImage = new CarPicsImage(data[this.imageSetIndex][0], 0, this.divId, this.displayHotspots, function() {});
         this.CurrentImage.HTMLElement.style.display = "block";
         if (config.linear === "true") {
             this.LinearReference = {
@@ -820,7 +929,7 @@ var CarPicsSpinnerAPI = (function() {
                 }
             }
         }
-        this.AllImages = new Array(data.length);
+        this.AllImages = new Array(data[this.imageSetIndex].length);
         this.AllImages[0] = this.CurrentImage;
         this.LoadCursor = this.CurrentImage;
         if (!this.mouseDisabled) {
