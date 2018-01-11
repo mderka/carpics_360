@@ -1,3 +1,5 @@
+/*global CarPicsImage*/
+
 if(!window.DisableCarpicsAnalytics){
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -257,7 +259,7 @@ var CarPicsSpinnerAPI = (function() {
         * Toggle event has occurred.  Toggle whether zoom is on or off.
         */
         this.zoomToggle = function(baseEvent, zoomout) {
-            if (this.zoomed == true && zoomout) {
+            if (this.zoomed === true && zoomout) {
                 this.CurrentImage.unzoom();
                 this.spinStatus = false;
                 this.zoomed = false;
@@ -299,8 +301,8 @@ var CarPicsSpinnerAPI = (function() {
             if (!this.spinStatus && autospin) {
                 return;
             }
-            if (direction == 1) {
-                nextImage = this.CurrentImage.NextImage
+            if (direction === 1) {
+                nextImage = this.CurrentImage.NextImage;
             } else if (direction == -1) {
                 nextImage = this.CurrentImage.PreviousImage;
             } else {
