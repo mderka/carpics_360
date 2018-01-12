@@ -1199,12 +1199,30 @@ var CarPicsSpinnerAPI = (function() {
                         modal.appendChild(modalBody);
                         // Display detail image (if provided)
                         if (poi.sourceUrl!=="" && typeof poi.sourceUrl!=="undefined") {
-                            var img = new Image();
-                            img.src=poi.sourceUrl;  // display the detail image of this hotspot
-                            img.style.width="100%";
-                            img.style.height="100%";
-                            img.style.marginBottom="10px";
-                            modalBody.appendChild(img);
+                            // distinguish if the url is for image or video(mp4)
+                            var format = poi.sourceUrl.split(".");
+                            format = format[format.length-1];
+                            if (format==="mp4"||format==="MP4"||format==="MOV"||format==="MOV") {
+                                // video
+                                var video = document.createElement("VIDEO");
+                                if (video.canPlayType("video/mp4")) {
+                                    video.setAttribute("src",poi.sourceUrl);
+                                } else {
+                                    // error handling
+                                }
+                                video.setAttribute("width", "100%");
+                                video.setAttribute("height", "100%");
+                                video.style.marginBottom="10px";
+                                modalBody.appendChild(video);
+                            } else {
+                                // image
+                                var img = new Image();
+                                img.src=poi.sourceUrl;  // display the detail image of this hotspot
+                                img.style.width="100%";
+                                img.style.height="100%";
+                                img.style.marginBottom="10px";
+                                modalBody.appendChild(img);
+                            }
                         }
                         // Display and style notes (if provided)
                         if (poi.notes!=="" && typeof poi.notes!=="undefined"){
@@ -1292,6 +1310,12 @@ var CarPicsSpinnerAPI = (function() {
                         modal.style.cursor="default";
                         modal.style.overflow="scroll";  // Enable scroll
                         overlay.appendChild(modal);
+                        modal.onclick = function(event) {
+                            event.stopPropagation();
+                        }
+                        modal.ondblclick = function(event) {
+                            event.stopPropagation();
+                        }
 
                         // Define modal header section
                         var modalHead = document.createElement("div");
@@ -1323,9 +1347,9 @@ var CarPicsSpinnerAPI = (function() {
                         modalCancelIcon.innerHTML="&#10005";  // Set icon to be 'x'
                         // close modal when pressing on cancel button
                         modalCancelIcon.onclick=(function(overlay){
-                            document.getElementById("popModalContainer").remove();
+                            document.getElementById(divId+"popModalContainer").remove();
                             element.style["-webkit-filter"]="none";
-                            document.getElementById("buttonWrap").style.opacity = 0.8;  // Display control buttons
+                            document.getElementById(divId+"buttonWrap").style.opacity = 0.8;  // Display control buttons
                         });
                         modalHeadIcons.appendChild(modalCancelIcon);
 
@@ -1336,12 +1360,31 @@ var CarPicsSpinnerAPI = (function() {
                         modal.appendChild(modalBody);
                         // Display detail image (if provided)
                         if (poi.sourceUrl!=="" && typeof poi.sourceUrl!=="undefined") {
-                            var img = new Image();
-                            img.src=poi.sourceUrl;  // display the detail image of this hotspot
-                            img.style.width="100%";
-                            img.style.height="100%";
-                            img.style.marginBottom="10px";
-                            modalBody.appendChild(img); 
+                            // distinguish if the url is for image or video(mp4)
+                            var format = poi.sourceUrl.split(".");
+                            format = format[format.length-1];
+                            if (format==="mp4"||format==="MP4"||format==="MOV"||format==="mov") {
+                                // video
+                                var video = document.createElement("VIDEO");
+                                if (video.canPlayType("video/mp4")) {
+                                    video.setAttribute("src",poi.sourceUrl);
+                                } else {
+                                    // error handling
+                                }
+                                video.setAttribute("width", "100%");
+                                video.setAttribute("height", "100%");
+                                video.style.marginBottom="10px";
+                                video.setAttribute("controls", "controls");
+                                modalBody.appendChild(video);
+                            } else {
+                                // image
+                                var img = new Image();
+                                img.src=poi.sourceUrl;  // display the detail image of this hotspot
+                                img.style.width="100%";
+                                img.style.height="100%";
+                                img.style.marginBottom="10px";
+                                modalBody.appendChild(img);
+                            }
                         }
                         // Display detail notes (if provided)
                         if (poi.notes!=="" && typeof poi.notes!=="undefined") {
