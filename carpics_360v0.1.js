@@ -1314,7 +1314,10 @@ var CarPicsSpinnerAPI = (function() {
                             event.stopPropagation();
                         }
                         modal.ondblclick = function(event) {
-                            event.stopPropagation();
+                            event.stopPropagation();  // prevent spinner zoom-in
+                        }
+                        modal.onmousedown = function(event) {
+                            event.stopPropagation();  // prevent spin
                         }
 
                         // Define modal header section
