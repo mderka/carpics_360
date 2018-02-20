@@ -716,7 +716,7 @@ var CarPicsSpinnerAPI = (function() {
                         var max_distance = spinnerDivPosition.width*spinnerDivPosition.width+spinnerDivPosition.height*spinnerDivPosition.height;
                         max_distance = Math.sqrt(max_distance);
                         var distance_ratio = 1 - distance/max_distance;
-                        distance_ratio = distance_ratio*distance_ratio*distance_ratio;
+                        distance_ratio = distance_ratio*distance_ratio*distance_ratio*distance_ratio;
                         list[i].HTMLElement.style.opacity = distance_ratio;
                     }
                 }
@@ -1167,12 +1167,12 @@ var CarPicsSpinnerAPI = (function() {
                         modal.style.position="absolute";
                         modal.style.margin="auto";
                         // Adjust the position of modal based on the position of hotspot in CarPicsSpinnerDiv
-                        if (e.clientX-position.left<position.width-modalWidth-25){
+                        if (e.clientX-position.left<position.width-modalWidth-125){
                             modal.style.left=(e.clientX-position.left)+"px";
-                            modal.style.marginLeft="10px";
+                            modal.style.marginLeft="50px";
                         } else {
                             modal.style.right=(position.width+position.left-e.clientX)+"px";
-                            modal.style.marginRight="10px";
+                            modal.style.marginRight="50px";
                         }
                         if (e.clientY-position.top<position.height-modalHeight-25){
                             modal.style.top=(e.clientY-position.top)+"px";
@@ -1245,7 +1245,7 @@ var CarPicsSpinnerAPI = (function() {
                         if (poi.notes!=="" && typeof poi.notes!=="undefined"){
                             var poiNotes = document.createElement("div");
                             poiNotes.setAttribute("id", "poiNotes");
-                            poiNotes.style.fontSize="0.9em";
+                            poiNotes.style.fontSize="0.75em";
                             poiNotes.innerHTML=poi.notes;  // display the notes of this hotspot
                             poiNotes.style.whiteSpace="pre-line";  // keep the line-breaks
                             poiNotes.style.overflow="hidden";
@@ -1295,6 +1295,45 @@ var CarPicsSpinnerAPI = (function() {
                 div.onclick = (function(element,poi){
                     return function(event){
                         event.stopPropagation();
+                        // Hide all hotspots when displaying detail modal
+                        var listOfHotspots = element.getElementsByClassName("hotspot");
+                        for (var j=0; j<listOfHotspots.length; j++) {
+                            // hide all
+                            listOfHotspots[j].style.display = "none";
+                            // only display current hotspot
+                            if (listOfHotspots[j].style.left == poi.x+"%" && listOfHotspots[j].style.top == poi.y+"%"){
+                                listOfHotspots[j].style.display = "block";
+                            }
+                        };
+                        // Zoom in image
+                        element.style.maxHeight="200%";
+                        element.style.maxWidth="200%";
+                        element.style.height="200%";
+                        element.style.width="200%";
+                        var offset = element.getBoundingClientRect();
+                        var parentOffset = element.parentElement.getBoundingClientRect();
+                        var clientX = event.clientX - parentOffset.left;
+                        var clientY = event.clientY - parentOffset.top;
+                        if (poi.x<=70) {
+                            // if the hotspot is in left 70% of the image, focus to left center when zoomed in
+                            var correctX =  (-clientX + offset.left - parentOffset.left)*2 + parentOffset.width/4;
+                        } else {
+                            // focus to right center when zoomed in
+                            var correctX =  (-clientX + offset.left - parentOffset.left)*2 + parentOffset.width*3/4;
+                        }
+                        var correctY =  (-clientY + offset.top - parentOffset.top)*2 + parentOffset.height/2;
+                        if(correctX>0){
+                            correctX=0;
+                        } else if ((-correctX) > (2*offset.width-parentOffset.width)) {
+                            correctX = -(offset.width*2-parentOffset.width);
+                        }
+                        if(correctY>0){
+                            correctY=0;
+                        } else if ((-correctY) > (2*offset.height-parentOffset.height)) {
+                            correctY = -(offset.height*2-parentOffset.height);
+                        }
+                        element.style.left = correctX + 'px';
+                        element.style.top = correctY + 'px';
                         // Create a overlay to display modal
                         var overlay = document.createElement("div");
                         overlay.style.fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif";
@@ -1303,11 +1342,14 @@ var CarPicsSpinnerAPI = (function() {
                         overlay.style.width="100%";
                         overlay.style.height="100%";
                         overlay.style.zIndex="32";  // display modal on top of image/hotspot
+                        /** Uncomment below if we want blur background
                         overlay.style.background="#00000088";  // make the overlay transparent with a little bit grey
                         element.style["-webkit-filter"]="blur(10px)";  // Blur backgound when display modal
+                        */
                         element.parentElement.insertBefore(overlay,element);
-                        // document.getElementById("buttonWrap").style.opacity = 0;  // Hide control buttons when displaying modal
-                        // close modal when user click outside modal
+                        document.getElementById(divId+"buttonWrap").style.opacity = 0;  // Hide control buttons when displaying modal
+                        /**  Uncomment below if we want this function back
+                        * close modal when user click outside modal
                         overlay.onclick = (function(e){
                             if(e.target.id==divId+"popModalContainer"){
                                 document.getElementById(divId+"popModalContainer").remove();
@@ -1315,13 +1357,28 @@ var CarPicsSpinnerAPI = (function() {
                                 document.getElementById(divId+"buttonWrap").style.opacity = 0.8;  // Display control buttons
                             }
                         });
+                        */
+                        overlay.ondblclick = function(event) {
+                            event.stopPropagation();  // prevent spinner zoom-in
+                        }
+                        overlay.onmousedown = function(event) {
+                            event.stopPropagation();  // prevent spin
+                        }
                         // Create full detail modal
                         var modal = document.createElement("div");
                         modal.style.lineHeight="1.414";
                         modal.setAttribute("id", divId+"popModal");
-                        modal.style.width="60%";
+                        modal.style.width="40%";
                         modal.style.maxHeight="85%";
-                        modal.style.margin="5% auto 5% auto";
+                        modal.style.position="absolute";
+                        if (poi.x<=70){
+                            // if the hotspot is in left 70% of the image, display detail modal on right bottom corner
+                            modal.style.right="20px";
+                        } else {
+                            // display detail modal on left bottom corner
+                            modal.style.left="20px";
+                        }
+                        modal.style.bottom="20px";
                         modal.style.background="#fff";
                         modal.style.borderRadius="8px";
                         modal.style.cursor="default";
@@ -1340,7 +1397,7 @@ var CarPicsSpinnerAPI = (function() {
                         // Define modal header section
                         var modalHead = document.createElement("div");
                         modalHead.style.height="36px";
-                        modalHead.style.width="60%";
+                        modalHead.style.width="100%";
                         // Set modal header color based on hotspot type
                         if (poi.type == "Damage") {
                             modalHead.style.background="#CA1246";   //feature: "#0d82bf"; damage: "#CA1246"
@@ -1368,8 +1425,21 @@ var CarPicsSpinnerAPI = (function() {
                         // close modal when pressing on cancel button
                         modalCancelIcon.onclick=(function(overlay){
                             document.getElementById(divId+"popModalContainer").remove();
+                            /** Uncomment below if we want blur background
                             element.style["-webkit-filter"]="none";
+                            */
                             document.getElementById(divId+"buttonWrap").style.opacity = 0.8;  // Display control buttons
+                            var listOfHotspots = element.getElementsByClassName("hotspot");
+                            for (var j=0; j<listOfHotspots.length; j++) {
+                                listOfHotspots[j].style.display = "block";  // show all hotspots
+                            };
+                            // Zoom out image
+                            element.style.maxHeight="100%";
+                            element.style.maxWidth="100%";
+                            element.style.height="100%";
+                            element.style.width="100%";
+                            element.style.left=0+"px";
+                            element.style.top=0+"px";
                         });
                         modalHeadIcons.appendChild(modalCancelIcon);
 
@@ -1411,6 +1481,7 @@ var CarPicsSpinnerAPI = (function() {
                             var poiNotes = document.createElement("div");
                             poiNotes.innerHTML=poi.notes;  // display the notes of this hotspot
                             poiNotes.style.whiteSpace="pre-line";  // Keep line-breaks
+                            poiNotes.style.fontSize="0.8em";
                             modalBody.appendChild(poiNotes);
                         }
 
@@ -1566,10 +1637,10 @@ var CarPicsSpinnerAPI = (function() {
             this.imgElement.style.height = "100%";
             this.imgElement.style.width = "100%";
             this.HTMLElement.style.overflow = "hidden";
-            // this.HTMLElement.style.transition = "all .5s linear";
-            // this.HTMLElement.style.mozTransition = "all .5s linear";
-            // this.HTMLElement.style.webkitTransition = "all .5s linear";
-            // this.HTMLElement.style.oTransition = "all .5s linear";
+            this.HTMLElement.style.transition = "all .5s linear";
+            this.HTMLElement.style.mozTransition = "all .5s linear";
+            this.HTMLElement.style.webkitTransition = "all .5s linear";
+            this.HTMLElement.style.oTransition = "all .5s linear";
             this.HTMLElement.style.khtmlUserSelect = "none";
             this.HTMLElement.style.display = "none";
             this.HTMLElement.style.oUserSelect = "none";
