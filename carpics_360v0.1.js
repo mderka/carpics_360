@@ -1128,10 +1128,8 @@ var CarPicsSpinnerAPI = (function() {
             var poi = source.poi;
             for(var i=0;i<poi.length;i++){
                 var div = document.createElement("div");
-                // div.title=poi[i].name;
                 div.style.width="24px";  // hotspot width
                 div.style.height="24px";  // hotspot height
-                div.style.borderRadius="24px";  // make hotspot round
                 div.style.zIndex="21";
                 div.style.position="absolute";  // set hotspot position according to poi location
                 div.style.left=poi[i].x+"%";
@@ -1163,9 +1161,9 @@ var CarPicsSpinnerAPI = (function() {
                         var modal = document.createElement("div");
                         modal.style.fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif";
                         modal.style.lineHeight="1.414";
-                        modal.setAttribute("id", divId+"modalHover");
                         modal.style.position="absolute";
                         modal.style.margin="auto";
+                        modal.setAttribute("id", divId+"modalHover");
                         // Adjust the position of modal based on the position of hotspot in CarPicsSpinnerDiv
                         if (e.clientX-position.left<position.width-modalWidth-125){
                             modal.style.left=(e.clientX-position.left)+"px";
@@ -1287,7 +1285,9 @@ var CarPicsSpinnerAPI = (function() {
                 // remove small detail modal after hover (on mouse leave)
                 div.onmouseout = (function(){
                     return function(){
-                        document.getElementById(divId+"modalHover").remove();
+                        if (document.getElementById(divId+"modalHover")){
+                            document.getElementById(divId+"modalHover").remove();
+                        };
                     }
                 })(this.HTMLElement, poi[i]);
                 // // Display full detail modal when click on hotspot
@@ -1295,6 +1295,10 @@ var CarPicsSpinnerAPI = (function() {
                 div.onclick = (function(element,poi){
                     return function(event){
                         event.stopPropagation();
+                        if (document.getElementById(divId+"modalHover")) {
+                            // Remove hover modal of hotspot if exists
+                            document.getElementById(divId+"modalHover").remove();
+                        }
                         // Hide all hotspots when displaying detail modal
                         var listOfHotspots = element.getElementsByClassName("hotspot");
                         for (var j=0; j<listOfHotspots.length; j++) {
@@ -1315,10 +1319,10 @@ var CarPicsSpinnerAPI = (function() {
                         var clientX = event.clientX - parentOffset.left;
                         var clientY = event.clientY - parentOffset.top;
                         if (poi.x<=70) {
-                            // if the hotspot is in left 70% of the image, focus to left center when zoomed in
+                            // if the hotspot is in left 70% of the image, focus to left center (25%, 50%) when zoomed in
                             var correctX =  (-clientX + offset.left - parentOffset.left)*2 + parentOffset.width/4;
                         } else {
-                            // focus to right center when zoomed in
+                            // focus to right center (75%, 50%) when zoomed in
                             var correctX =  (-clientX + offset.left - parentOffset.left)*2 + parentOffset.width*3/4;
                         }
                         var correctY =  (-clientY + offset.top - parentOffset.top)*2 + parentOffset.height/2;
@@ -1366,10 +1370,9 @@ var CarPicsSpinnerAPI = (function() {
                         }
                         // Create full detail modal
                         var modal = document.createElement("div");
-                        modal.style.lineHeight="1.414";
                         modal.setAttribute("id", divId+"popModal");
                         modal.style.width="40%";
-                        modal.style.maxHeight="85%";
+                        modal.style.maxHeight="70%";
                         modal.style.position="absolute";
                         if (poi.x<=70){
                             // if the hotspot is in left 70% of the image, display detail modal on right bottom corner
@@ -1396,7 +1399,6 @@ var CarPicsSpinnerAPI = (function() {
 
                         // Define modal header section
                         var modalHead = document.createElement("div");
-                        modalHead.style.height="36px";
                         modalHead.style.width="100%";
                         // Set modal header color based on hotspot type
                         if (poi.type == "Damage") {
@@ -1406,17 +1408,17 @@ var CarPicsSpinnerAPI = (function() {
                         }
                         modalHead.style.color="#EAEAEA";  // set header text color to be almost-white
                         modalHead.style.borderRadius="5px 5px 0px 0px";
-                        modalHead.style.fontSize="1.2em";
-                        modalHead.style.lineHeight="36px";  // make modal header text vertically middle
-                        modalHead.style.position="absolute";
+                        modalHead.style.fontSize="1em";
+                        modalHead.style.padding="5px 5px 5px 15px";
                         modal.appendChild(modalHead);
                         var modalHeadText = document.createElement("span");
-                        modalHeadText.style.marginLeft="15px";
+                        modalHeadText.style.marginRight="45px";
                         modalHeadText.innerHTML=poi.name;  // Display the name of hotspot on modal header
                         modalHead.appendChild(modalHeadText);
                         var modalHeadIcons = document.createElement("span");
-                        modalHeadIcons.style.float="right";  // Display modal-control-button on right
-                        modalHeadIcons.style.marginRight="15px";
+                        modalHeadIcons.style.position="absolute";
+                        modalHeadIcons.style.right="15px";   // Display modal-control-button on right
+                        modalHeadIcons.style.top="5px";
                         modal.style.cursor="pointer";
                         modalHead.appendChild(modalHeadIcons);
                         // Create a cancel button on modal header to close modal
@@ -1446,7 +1448,6 @@ var CarPicsSpinnerAPI = (function() {
                         // Define modal body section
                         var modalBody = document.createElement("div");
                         modalBody.style.padding="15px";
-                        modalBody.style.marginTop="36px";
                         modal.appendChild(modalBody);
                         // Display detail image (if provided)
                         if (poi.sourceUrl!=="" && typeof poi.sourceUrl!=="undefined") {
@@ -1481,7 +1482,7 @@ var CarPicsSpinnerAPI = (function() {
                             var poiNotes = document.createElement("div");
                             poiNotes.innerHTML=poi.notes;  // display the notes of this hotspot
                             poiNotes.style.whiteSpace="pre-line";  // Keep line-breaks
-                            poiNotes.style.fontSize="0.8em";
+                            poiNotes.style.fontSize="0.7em";
                             modalBody.appendChild(poiNotes);
                         }
 
@@ -1719,7 +1720,7 @@ var CarPicsSpinnerAPI = (function() {
             buttonWrap.setAttribute("id", divId+"buttonWrap");
             buttonWrap.style.position="absolute";
             buttonWrap.style.top= "50%";
-            buttonWrap.style.transform="translate(0, -50%)";
+            buttonWrap.style.transform="translateY(-50%)";
             buttonWrap.style.right="6px";
             buttonWrap.style.zIndex="22";
             buttonWrap.style.opacity="0.8";
