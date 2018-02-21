@@ -1399,7 +1399,6 @@ var CarPicsSpinnerAPI = (function() {
 
                         // Define modal header section
                         var modalHead = document.createElement("div");
-                        modalHead.style.width="100%";
                         // Set modal header color based on hotspot type
                         if (poi.type == "Damage") {
                             modalHead.style.background="#CA1246";   //feature: "#0d82bf"; damage: "#CA1246"
