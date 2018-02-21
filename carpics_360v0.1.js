@@ -1718,7 +1718,8 @@ var CarPicsSpinnerAPI = (function() {
             var buttonWrap = document.createElement("div");
             buttonWrap.setAttribute("id", divId+"buttonWrap");
             buttonWrap.style.position="absolute";
-            buttonWrap.style.top= "40%";
+            buttonWrap.style.top= "50%";
+            buttonWrap.style.transform="translate(0, -50%)";
             buttonWrap.style.right="6px";
             buttonWrap.style.zIndex="22";
             buttonWrap.style.opacity="0.8";
