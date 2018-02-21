@@ -144,7 +144,8 @@ var CarPicsSpinnerAPI = (function() {
             var buttonWrap = document.createElement("div");
             buttonWrap.setAttribute("id", this.divId+"buttonWrap");
             buttonWrap.style.position="absolute";
-            buttonWrap.style.top= "40%";
+            buttonWrap.style.top= "50%";
+            buttonWrap.style.transform="translateY(-50%)";
             buttonWrap.style.right="6px";
             buttonWrap.style.zIndex="22";
             buttonWrap.style.opacity="0.8";
@@ -189,9 +190,9 @@ var CarPicsSpinnerAPI = (function() {
             zoomInButton.style.margin="4px 0";
             zoomInButton.style.cursor="pointer";
             zoomInButton.setAttribute("id", this.divId+"zoom_in_button");
-            zoomInButton.innerHTML="+";
-            zoomInButton.style.fontSize="18px";
-            zoomInButton.style.fontWeight="600";
+            var zoomInFaIcon = document.createElement("i");
+            zoomInFaIcon.className = "fas fa-search-plus";
+            zoomInButton.appendChild(zoomInFaIcon);
             buttonWrap.appendChild(zoomInButton);
             buttonWrap.appendChild(document.createElement("br"));
             // Create zoom-out-button for CarPicsSpinnerDiv
@@ -205,9 +206,9 @@ var CarPicsSpinnerAPI = (function() {
             zoomOutButton.style.margin="4px 0";
             zoomOutButton.style.cursor="pointer";
             zoomOutButton.setAttribute("id", this.divId+"zoom_out_button");
-            zoomOutButton.innerHTML="-";
-            zoomOutButton.style.fontSize="18px";
-            zoomOutButton.style.fontWeight="600";
+            var zoomOutFaIcon = document.createElement("i");
+            zoomOutFaIcon.className = "fas fa-search-minus";
+            zoomOutButton.appendChild(zoomOutFaIcon);
             buttonWrap.appendChild(zoomOutButton);
             buttonWrap.appendChild(document.createElement("br"));
             // Create hotspot-button for CarPicsSpinnerDiv
@@ -221,8 +222,6 @@ var CarPicsSpinnerAPI = (function() {
             hotspotButton.style.margin="4px 0";
             hotspotButton.style.cursor="pointer";
             hotspotButton.setAttribute("id", this.divId+"hotspot_button");
-            hotspotButton.style.fontSize="14px";
-            hotspotButton.style.fontWeight="600";
             buttonWrap.appendChild(hotspotButton);
         }
         // Set icon for hotspot_button
@@ -1093,7 +1092,7 @@ var CarPicsSpinnerAPI = (function() {
                 var div = document.createElement("div");
                 div.style.width="24px";  // hotspot width
                 div.style.height="24px";  // hotspot height
-                div.style.zIndex="41";
+                div.style.zIndex="21";
                 div.style.position="absolute";  // set hotspot position according to poi location
                 div.style.left=poi[i].x+"%";
                 div.style.top=poi[i].y+"%";
