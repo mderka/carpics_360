@@ -717,6 +717,8 @@ var CarPicsSpinnerAPI = (function() {
                         max_distance = Math.sqrt(max_distance);
                         var distance_ratio = 1 - distance/max_distance;
                         distance_ratio = distance_ratio*distance_ratio*distance_ratio*distance_ratio;
+                        // Set a minimum opacity for hotspots
+                        distance_ratio = (distance_ratio<=0.1?0.1:distance_ratio);
                         list[i].HTMLElement.style.opacity = distance_ratio;
                     }
                 }
@@ -1309,35 +1311,6 @@ var CarPicsSpinnerAPI = (function() {
                                 listOfHotspots[j].style.display = "block";
                             }
                         };
-                        // Zoom in image
-                        element.style.maxHeight="200%";
-                        element.style.maxWidth="200%";
-                        element.style.height="200%";
-                        element.style.width="200%";
-                        var offset = element.getBoundingClientRect();
-                        var parentOffset = element.parentElement.getBoundingClientRect();
-                        var clientX = event.clientX - parentOffset.left;
-                        var clientY = event.clientY - parentOffset.top;
-                        if (poi.x<=70) {
-                            // if the hotspot is in left 70% of the image, focus to left center (25%, 50%) when zoomed in
-                            var correctX =  (-clientX + offset.left - parentOffset.left)*2 + parentOffset.width/4;
-                        } else {
-                            // focus to right center (75%, 50%) when zoomed in
-                            var correctX =  (-clientX + offset.left - parentOffset.left)*2 + parentOffset.width*3/4;
-                        }
-                        var correctY =  (-clientY + offset.top - parentOffset.top)*2 + parentOffset.height/2;
-                        if(correctX>0){
-                            correctX=0;
-                        } else if ((-correctX) > (2*offset.width-parentOffset.width)) {
-                            correctX = -(offset.width*2-parentOffset.width);
-                        }
-                        if(correctY>0){
-                            correctY=0;
-                        } else if ((-correctY) > (2*offset.height-parentOffset.height)) {
-                            correctY = -(offset.height*2-parentOffset.height);
-                        }
-                        element.style.left = correctX + 'px';
-                        element.style.top = correctY + 'px';
                         // Create a overlay to display modal
                         var overlay = document.createElement("div");
                         overlay.style.fontFamily="'Helvetica Neue', Helvetica, Arial, sans-serif";
@@ -1386,7 +1359,7 @@ var CarPicsSpinnerAPI = (function() {
                         modal.style.borderRadius="8px";
                         modal.style.cursor="default";
                         modal.style.overflow="scroll";  // Enable scroll
-                        overlay.appendChild(modal);
+                        
                         modal.onclick = function(event) {
                             event.stopPropagation();
                         }
@@ -1484,7 +1457,65 @@ var CarPicsSpinnerAPI = (function() {
                             poiNotes.style.fontSize="0.7em";
                             modalBody.appendChild(poiNotes);
                         }
-
+                        // Zoom in image
+                        element.style.maxHeight="200%";
+                        element.style.maxWidth="200%";
+                        element.style.height="200%";
+                        element.style.width="200%";
+                        var offset = element.getBoundingClientRect();
+                        var parentOffset = element.parentElement.getBoundingClientRect();
+                        var clientX = event.clientX - parentOffset.left;
+                        var clientY = event.clientY - parentOffset.top;
+                        var correctX =  (-clientX + offset.left - parentOffset.left)*2 + parentOffset.width/2;
+                        var correctY =  (-clientY + offset.top - parentOffset.top)*2 + parentOffset.height/2;
+                        if(correctX>0){
+                            correctX=0;
+                        } else if ((-correctX) > (2*offset.width-parentOffset.width)) {
+                            correctX = -(offset.width*2-parentOffset.width);
+                        }
+                        if(correctY>0){
+                            correctY=0;
+                        } else if ((-correctY) > (2*offset.height-parentOffset.height)) {
+                            correctY = -(offset.height*2-parentOffset.height);
+                        }
+                        element.style.left = correctX + 'px';
+                        element.style.top = correctY + 'px';
+                        setTimeout(function(){
+                            if (poi.x<=70) {
+                                // if the hotspot is in left 70% of the image, focus to left center (25%, 50%) when zoomed in
+                                var correctX =  (-clientX + offset.left - parentOffset.left)*2 + parentOffset.width/4;
+                            } else {
+                                // focus to right center (75%, 50%) when zoomed in
+                                var correctX =  (-clientX + offset.left - parentOffset.left)*2 + parentOffset.width*3/4;
+                            }
+                            var correctY =  (-clientY + offset.top - parentOffset.top)*2 + parentOffset.height/2;
+                            if(correctX>0){
+                                correctX=0;
+                            } else if ((-correctX) > (2*offset.width-parentOffset.width)) {
+                                correctX = -(offset.width*2-parentOffset.width);
+                            }
+                            if(correctY>0){
+                                correctY=0;
+                            } else if ((-correctY) > (2*offset.height-parentOffset.height)) {
+                                correctY = -(offset.height*2-parentOffset.height);
+                            }
+                            element.style.left = correctX + 'px';
+                            element.style.top = correctY + 'px';
+                            setTimeout(function(){
+                                // Fade animation for displaying detail modal
+                                var steps=0;
+                                modal.style.opacity=0;
+                                overlay.appendChild(modal);
+                                var timer = setInterval(function() {
+                                    steps++;
+                                    modal.style.opacity = 0.1 * steps;
+                                    if(steps >= 10) {
+                                        clearInterval(timer);
+                                        timer = undefined;
+                                    }
+                                }, 50);
+                            }, 500);            
+                        },500);
                         var offset = element.getBoundingClientRect();
                         var XOffset;
                         var YOffset;
