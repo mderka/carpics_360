@@ -1566,20 +1566,7 @@ var CarPicsSpinnerAPI = (function() {
                                     line.style.transform="rotate("+ deg + "deg)";
                                     line.style.transformOrigin="0% 0%";
                                     overlay.appendChild(line);
-                                }
-                                // var tryDiv = document.createElement("div");
-                                // var modalOffset = document.getElementById(divId+"popModal").getBoundingClientRect();
-                                // console.log(modalOffset)
-                                // tryDiv.style.height="10px";
-                                // tryDiv.style.width="10px";
-                                // tryDiv.style.background="red";
-                                // tryDiv.style.zIndex="100";
-                                // tryDiv.style.position = "absolute";
-                                // tryDiv.style.left=poi.x*offset.width*2/100+correctX+"px";
-                                // tryDiv.style.top=poi.y*offset.height*2/100+12+correctY+"px";
-                                // overlay.appendChild(tryDiv);
-
-
+                                };
                             }, 500);            
                         },500);
                         var offset = element.getBoundingClientRect();
