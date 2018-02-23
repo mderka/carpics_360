@@ -1514,6 +1514,72 @@ var CarPicsSpinnerAPI = (function() {
                                         timer = undefined;
                                     }
                                 }, 50);
+                                // Draw the line to connect hotspot and the modal
+                                var modalOffset = document.getElementById(divId+"popModal").getBoundingClientRect();
+                                var lineColor = "#0d82bf";
+                                var lineHeight = "2px";
+                                var lineStyle = "solid";
+                                if (poi.x<=70) {
+                                    // find the up-right corner of modal
+                                    // append on overlay
+                                    modalLineX = modalOffset.x-parentOffset.x;
+                                    modalLineY = modalOffset.y-parentOffset.y;
+
+                                    // start the line on right side of the hotspot in the middle
+                                    hotspotLineX = poi.x*offset.width*2/100+24+correctX;
+                                    hotspotLineY = poi.y*offset.height*2/100+12+correctY;
+                                    var line = document.createElement("div");
+                                    var lineWidth = 
+                                        Math.sqrt( (modalLineX-hotspotLineX)*(modalLineX-hotspotLineX) + (modalLineY-hotspotLineY)*(modalLineY-hotspotLineY) );
+                                    line.style.position="absolute";
+                                    line.style.left=hotspotLineX+"px";
+                                    line.style.top=hotspotLineY+"px";
+                                    line.style.width=lineWidth+"px";
+                                    line.style.height="1px";
+                                    line.style.borderTop=lineStyle + " " + lineHeight + " " + lineColor;
+                                    // get the rotation angle
+                                    var deg = Math.atan2(modalLineY - hotspotLineY, modalLineX - hotspotLineX) * 180 / Math.PI;
+                                    line.style.transform="rotate("+ deg + "deg)";
+                                    line.style.transformOrigin="0% 0%";
+                                    overlay.appendChild(line);
+                                } else {
+                                    // find the up-left corner of modal
+                                    // append on overlay
+                                    modalLineX = modalOffset.x-parentOffset.x+modalOffset.width;
+                                    modalLineY = modalOffset.y-parentOffset.y;
+
+                                    // start the line on left side of the hotspot in the middle
+                                    hotspotLineX = poi.x*offset.width*2/100+correctX;
+                                    hotspotLineY = poi.y*offset.height*2/100+12+correctY;
+
+                                    var line = document.createElement("div");
+                                    var lineWidth = 
+                                        Math.sqrt( (modalLineX-hotspotLineX)*(modalLineX-hotspotLineX) + (modalLineY-hotspotLineY)*(modalLineY-hotspotLineY) );
+                                    line.style.position="absolute";
+                                    line.style.left=modalLineX+"px";
+                                    line.style.top=modalLineY+"px";
+                                    line.style.width=lineWidth+"px";
+                                    line.style.height="1px";
+                                    line.style.borderTop=lineStyle + " " + lineHeight + " " + lineColor;
+                                    // get the rotation angle
+                                    var deg = Math.atan2(hotspotLineY - modalLineY, hotspotLineX - modalLineX) * 180 / Math.PI;
+                                    line.style.transform="rotate("+ deg + "deg)";
+                                    line.style.transformOrigin="0% 0%";
+                                    overlay.appendChild(line);
+                                }
+                                // var tryDiv = document.createElement("div");
+                                // var modalOffset = document.getElementById(divId+"popModal").getBoundingClientRect();
+                                // console.log(modalOffset)
+                                // tryDiv.style.height="10px";
+                                // tryDiv.style.width="10px";
+                                // tryDiv.style.background="red";
+                                // tryDiv.style.zIndex="100";
+                                // tryDiv.style.position = "absolute";
+                                // tryDiv.style.left=poi.x*offset.width*2/100+correctX+"px";
+                                // tryDiv.style.top=poi.y*offset.height*2/100+12+correctY+"px";
+                                // overlay.appendChild(tryDiv);
+
+
                             }, 500);            
                         },500);
                         var offset = element.getBoundingClientRect();
