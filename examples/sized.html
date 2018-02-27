@@ -1,16 +1,12 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html>
    <head>
-      <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.css">
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-      <script src="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js"></script>
       <title>Car Pics 2.0 - 360 photos</title>
    </head>
+   <link rel="stylesheet" href="https://cdn.pannellum.org/2.3/pannellum.css"/>
+   <script type="text/javascript" src="https://cdn.pannellum.org/2.3/pannellum.js"></script>
    <body style="background: url();">
       <style>
-         #frm2menu div:hover {
-            color: #428bca !important;
-         }
          h1 {
            font: bold 330%/100% "Lucida Grande";
            position: relative;
@@ -21,28 +17,27 @@
          h1 span {
            background: url(gradient-dark-stripe-hz.png) repeat-x;
            position: absolute;
+           bottom: 0;
            display: block;
            width: 100%;
-           height: 31px;
+           height: 34px;
          }
          .displayStyle{
             touch-action: none; 
             background-color:#fff; 
-            width: 70%; 
             height: auto; 
-            max-height: 70vh;
             margin: auto;  
-            border: 5px solid #fff;
+            border: 2px solid #fff;
          }
       </style>
       <div style="height: 100vh; width: 100vw; background: url(../examples/background.png) no-repeat;background-size: 100% 100%; display: flex; align-items: center; justify-content: center;">
-         <div style="margin-top: 60px;">
-            <div id="georgecarmichael" class="carPicsSpinner displayStyle" vin="1" dealer="001">
-            </div> 
+         <div style="width: 60vw;">
+            <div id="georgecarmichael" class="carPicsSpinner displayStyle" vin="ICTC" dealer="001" style="position: relative; height: 45vw;" displayHotspots="true" enableInertialMove="true" spinSensitivity="25">
+            </div>
             <div style="text-align: center; color: #fff; text-shadow: none; margin-top: 0.5em;">
-               <h1><span></span>CAR PICS 2.0 360</h1>
-               <div style="font-size: 0.9em;">
-                  For more information, contact support@carpics2p0.com
+               <h1><span></span>CAR MEDIA 2.0 360</h1>
+               <div style="font-size: 0.9em; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                  For more information, contact support@carmedia2p0.com
                </div>
             </div>
          </div>
