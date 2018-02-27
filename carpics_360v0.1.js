@@ -68,6 +68,47 @@ var CarPicsSpinnerAPI = (function() {
     * Spinner class.  One spinner div will correspond to one CarPicsSpinner. 
     */
     this.CarPicsSpinner = function(config, data) {
+        var thisObj = this;
+        this.SpinPosition = 1/8;
+        var xhttp = new XMLHttpRequest();
+        this.ActiveImages = [];
+        xhttp.onreadystatechange=function(){
+            if(this.readyState == 4 && this.status ==200){
+                thisObj.ExteriorData = JSON.parse(this.responseText);
+                thisObj.ExteriorImages = new Array(thisObj.ExteriorData.length);
+                thisObj.ActiveImages = thisObj.ExteriorImages;
+                var isFirst=true;
+                for (var i = 0; i < thisObj.numberOfConnections; i++) {
+                    thisObj.addImageAtCursor(isFirst, thisObj.ExteriorImages,Math.floor(thisObj.ExteriorImages.length*thisObj.SpinPosition));
+                    isFirst=false;
+                }
+            }
+        }
+        xhttp.open("get", "https://feed.carpics2p0.com/rest/spinner/s3?dealer=" 
+            + config.sourceURL.dealer + "&vin=" + config.sourceURL.vin);
+        xhttp.send();
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange=function(){
+            if(this.readyState == 4 && this.status ==200){
+                thisObj.InteriorData = JSON.parse(this.responseText);
+                thisObj.InteriorImages = new Array(thisObj.InteriorData.length);
+                var isFirst=true;
+                for (var i = 0; i < thisObj.numberOfConnections; i++) {
+                    thisObj.addImageAtCursor(isFirst,thisObj.InteriorImages,Math.floor(thisObj.InteriorImages.length*thisObj.SpinPosition),true);
+                    isFirst=false;
+                }
+            }
+        }
+        xhttp.open("get", "https://feed.carpics2p0.com/rest/spinner/s3?dealer=" 
+            + config.sourceURL.dealer + "&vin=" + "ICTO");
+        xhttp.send();
+        this.insertPlaceholder = function(){
+            var element = document.getElementById(this.divId);
+            element.style.backgroundImage="url('http://resources.carpics2p0.com/Rotation/checkerboard-backgrounds-wallpapers.jpg')"
+            element.style.repeat="repeat"
+        }
+        this.divId = config.divId;
+        this.insertPlaceholder();
         this.StartTime = Date.now();
         this.connectionsFinished = 0;
         this.divId = config.divId;
@@ -326,15 +367,16 @@ var CarPicsSpinnerAPI = (function() {
                     break;
                 }
             }
-            if (!nextImage.isReady) {
-                return;
-            }
-            this.spinnerDiv.style.backgroundImage = "url('http://cdn.carpics2p0.com/" + this.CurrentImage.sourceObject.src + "')";
+        }
+
+        this.displayGiven = function(index){
+            this.spinnerDiv.style.backgroundImage = "url('https://s3-us-west-2.amazonaws.com/cdn.carpics2p0.com/" + this.CurrentImage.sourceObject.src + "')";
             this.spinnerDiv.style.backgroundSize = "100% 100%";
-            var previous = this.CurrentImage;
-            this.CurrentImage = nextImage;
+            this.CurrentImage.HTMLElement.style.display = "none";
+            this.CurrentImage.hideHotspots();
+            this.CurrentImage = this.ActiveImages[index];
             this.CurrentImage.HTMLElement.style.display = "block";
-            previous.HTMLElement.style.display = "none";
+            this.CurrentImage.hideHotspots();
         }
         this.insertPlaceholder = function(){
             var element = document.getElementById(this.divId);
@@ -378,6 +420,9 @@ var CarPicsSpinnerAPI = (function() {
             */
             document.getElementById(this.divId).addEventListener("mousedown", (function(thisObj) {
                 return function(baseEvent) {
+                    if(thisObj.panoramaView){
+                        return;
+                    }
                     baseEvent.preventDefault();
                     var thisTouch = Date.now();
                     if (thisObj.zoomed || baseEvent.button === 2) {
@@ -406,6 +451,9 @@ var CarPicsSpinnerAPI = (function() {
             */
             document.getElementById(this.divId).addEventListener("dblclick", (function(thisObj) {
                 return function(baseEvent) {
+                    if(thisObj.panoramaView){
+                        return;
+                    }
                     CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Doubleclick'});
                     baseEvent.preventDefault();
                     var releaseMouse = thisObj.zoomToggle(baseEvent);
@@ -422,8 +470,11 @@ var CarPicsSpinnerAPI = (function() {
             /*
             * Clicking on zoomin button triggers desktop zoom in event.
             */
-            document.getElementById(this.divId+"zoom_in_button").addEventListener("click", (function(thisObj) {
+            var zoomInButton = (function(thisObj) {
                 return function(baseEvent) {
+                    if(thisObj.panoramaView){
+                        return;
+                    }
                     baseEvent.stopPropagation();
                     CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
                     baseEvent.preventDefault();
@@ -435,8 +486,60 @@ var CarPicsSpinnerAPI = (function() {
                         thisObj.spinStatus = thisObj.spinDefault;
                         thisObj.turnStatus = false;
                     }
+                    var touchMove = (function(thisInternal) {
+                            return function(event1) {
+                                event1.preventDefault();
+                                if (thisInternal.pauseMouseTime > Date.now()) {
+                                    return;
+                                }
+                                if (thisInternal.turnStatus !== true && thisInternal.zoomed !== true) {
+                                    return;
+                                }
+                                var touch = event1.targetTouches[0];
+                                thisInternal.lastXPosition = touch.clientX;
+                                thisInternal.lastYPosition = touch.clientY;
+                                thisInternal.mouseXPosition = touch.clientX;
+                                thisInternal.mouseYPosition = touch.clientY;
+                                thisInternal.pauseMouseTime = Date.now() + 25;
+                            }
+                        }
+                    )(thisObj);
+                    document.getElementById(thisObj.divId).addEventListener('touchstart', touchMove);
+                    document.getElementById(thisObj.divId).addEventListener('touchend', function(){
+                        document.getElementById(thisObj.divId).removeEventListener('touchend', touchMove);
+                    });
+                    document.getElementById(thisObj.divId).addEventListener('touchmove', (
+                        function(thisInternal) {
+                            return function(event1) {
+                                event1.preventDefault();
+                                if (thisInternal.pauseMouseTime > Date.now()) {
+                                    return;
+                                }
+                                if (thisInternal.turnStatus !== true && thisInternal.zoomed !== true) {
+                                    return;
+                                }
+                                var touch = event1.targetTouches[0];
+                                var currentXPosition = touch.pageX;
+                                var currentYPosition = touch.pageY;
+                                if (thisInternal.zoomed == true) {
+                                    thisInternal.CurrentImage.dragMove(touch, thisInternal.CurrentImage.HTMLElement.getBoundingClientRect(),
+                                        false,thisInternal.mouseXPosition, thisInternal.mouseYPosition,thisInternal.lastXPosition, thisInternal.lastYPosition);
+                                    thisInternal.lastXPosition = touch.clientX;
+                                    thisInternal.lastYPosition = touch.clientY;
+                                } else {
+                                    thisInternal.displayNextImage(thisInternal.mouseXPosition - currentXPosition);
+                                    thisObj.turning = true;
+                                }
+                                thisInternal.mouseXPosition = currentXPosition;
+                                thisInternal.mouseYPosition = currentYPosition;
+                                thisInternal.pauseMouseTime = Date.now() + 25;
+                            }
+                        }
+                    )(thisObj));
                 }
-            })(this));
+            })(this);
+            document.getElementById(this.divId+"zoom_in_button").addEventListener("click", zoomInButton);
+            document.getElementById(this.divId+"zoom_in_button").addEventListener("touchstart", zoomInButton);
 
             document.getElementById(this.divId+"zoom_in_button").addEventListener("mouseleave", (function(thisObj) {
                 return function(baseEvent) {
@@ -501,8 +604,11 @@ var CarPicsSpinnerAPI = (function() {
             /*
             * Clicking on zoomout button triggers desktop zoom out event.
             */
-            document.getElementById(this.divId+"zoom_out_button").addEventListener("click", (function(thisObj) {
+            var zoomInFunction = (function(thisObj) {
                 return function(baseEvent) {
+                    if(thisObj.panoramaView){
+                        return;
+                    }
                     baseEvent.stopPropagation();
                     CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
                     baseEvent.preventDefault();
@@ -515,13 +621,18 @@ var CarPicsSpinnerAPI = (function() {
                         thisObj.turnStatus = false;
                     }
                 }
-            })(this));
+            })(this);
+            document.getElementById(this.divId+"zoom_out_button").addEventListener("click", zoomInFunction);
+            document.getElementById(this.divId+"zoom_out_button").addEventListener("touchstart", zoomInFunction);
 
             /*
             * Clicking on hotspot button triggers display/hide hotspots
             */
-            document.getElementById(this.divId+"hotspot_button").addEventListener("click", (function(thisObj) {
+            var toggleHotspots = (function(thisObj) {
                 return function(baseEvent) {
+                    if(thisObj.panoramaView){
+                        return;
+                    }
                     baseEvent.stopPropagation();
                     CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
                     baseEvent.preventDefault();
@@ -557,30 +668,32 @@ var CarPicsSpinnerAPI = (function() {
                         buttonElement.appendChild(poiFaIcon);
                     }
                 }
-            })(this));
+            })(this);
+            document.getElementById(this.divId+"hotspot_button").addEventListener("click", toggleHotspots);
+            document.getElementById(this.divId+"hotspot_button").addEventListener("touchstart", toggleHotspots);
 
             /*
             * Clicking on door_open_button triggers displaying door_open_spinner
             */
-            document.getElementById(this.divId+"door_open_button").addEventListener("click", (function(thisObj) {
+            var doorOpen = (function(thisObj) {
                 return function(baseEvent) {
-                    baseEvent.stopPropagation();
-                    CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Click'});
-                    baseEvent.preventDefault();
-                    thisObj.spinnerDiv = document.getElementById(thisObj.divId);
-                    if (thisObj.displayDoorOpen == true) {
-                        // display door closed spinner
-                        thisObj.imageSetIndex = 0;
-                        while (thisObj.spinnerDiv.childNodes.length > 2) {
-                            thisObj.spinnerDiv.removeChild(thisObj.spinnerDiv.lastChild);
-                        }
-                        thisObj.setDefaultSpinnerStyles = function() {
-                            thisObj.spinnerDiv.style.cursor = "grab";
-                            thisObj.spinnerDiv.style.cursor = "-webkit-grab";
-                            thisObj.spinnerDiv.style.cursor = "-moz-grab";
-                            thisObj.spinnerDiv.style.overflow = "hidden";
-                        }
-                        thisObj.CurrentImage = new CarPicsImage(data[thisObj.imageSetIndex][0], 0, thisObj.divId, thisObj.displayHotspots, function() {});
+                    if(thisObj.toggling || thisObj.panoramaView){
+                        return;
+                    }
+                    thisObj.toggling = true;
+                    thisObj.spinToToggleDoors(thisObj, thisObj.SpinPosition, true);
+                }
+            })(this);
+            document.getElementById(this.divId+"door_open_button").addEventListener("click", doorOpen);
+            document.getElementById(this.divId+"door_open_button").addEventListener("touchstart", doorOpen);
+
+            /*
+            * Clicking on door_open_button triggers displaying door_open_spinner
+            */
+            var panoramaFunction = (function(thisObj) {
+                return function(baseEvent) {
+                    if(thisObj.panoramaView){
+                        thisObj.panoramaDiv.parentElement.removeChild(thisObj.panoramaDiv);
                         thisObj.CurrentImage.HTMLElement.style.display = "block";
                         if (config.linear === "true") {
                             thisObj.LinearReference = {
@@ -684,13 +797,46 @@ var CarPicsSpinnerAPI = (function() {
                         document.getElementById(thisObj.divId+"door_open_button").innerHTML="O";
                     }
                 }
-            })(this));
+            })(this);
+            document.getElementById(this.divId+"panoButton").addEventListener("click", panoramaFunction);
+            //document.getElementById(this.divId+"panoButton").addEventListener("touchstart", panoramaFunction);
+
+            this.spinToToggleDoors = function(thisObj, spinPosition, switched){
+                setTimeout(function(){
+                    var toSwitch = switched;
+                    var test = thisObj.SpinPosition;
+                    if(thisObj.SpinPosition<spinPosition){
+                        test = test + 1;
+                    }
+                    if (Math.abs(test - spinPosition)>.75 && toSwitch){
+                        toSwitch = false;
+                        thisObj.CurrentImage.HTMLElement.style.display = "none";
+                        if(thisObj.displayInterior){
+                            thisObj.ActiveImages = thisObj.ExteriorImages;
+                            thisObj.displayInterior=false;
+                        } else {
+                            thisObj.ActiveImages = thisObj.InteriorImages;
+                            thisObj.displayInterior=true;
+                        }
+                    }
+                    thisObj.displayNextImage(thisObj.spinnerDiv.getBoundingClientRect().width*.05);
+                    if(Math.abs(thisObj.SpinPosition - spinPosition)<.0495){
+                        thisObj.toggling = false;
+                        thisObj.CurrentImage.displayHotspots();
+                        return;
+                    }
+                    thisObj.spinToToggleDoors(thisObj, spinPosition, toSwitch);
+                }, 50);
+            }
 
             /*
             * Prevent double click on buttons
             */
             document.getElementById(this.divId+"buttonWrap").addEventListener("dblclick", (function(thisObj) {
                 return function(baseEvent) {
+                    if(thisObj.panoramaView){
+                        return;
+                    }
                     baseEvent.stopPropagation();
                     CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Doubleclick'});
                     baseEvent.preventDefault();
@@ -720,7 +866,10 @@ var CarPicsSpinnerAPI = (function() {
                         // Set a minimum opacity for hotspots
                         distance_ratio = (distance_ratio<=0.1?0.1:distance_ratio);
                         list[i].HTMLElement.style.opacity = distance_ratio;
+                    if(thisObj.panoramaView){
+                        return;
                     }
+                    var list = thisObj.CurrentImage.updateOpacity(baseEvent);
                 }
             })(this));
 
@@ -729,6 +878,9 @@ var CarPicsSpinnerAPI = (function() {
             */
             document.getElementById(this.divId).addEventListener("mouseup", (function(thisObj) {
                 return function(baseEvent) {
+                    if(thisObj.panoramaView){
+                        return;
+                    }
                     baseEvent.preventDefault();
                     if (thisObj.zoomed || thisObj.mouseDisabled) {
                         thisObj.mouseHold = false;
@@ -747,8 +899,10 @@ var CarPicsSpinnerAPI = (function() {
                             }   
                         }
                     }
+
                     thisObj.spinStatus = thisObj.spinDefault;
                     thisObj.turnStatus = false;
+                    thisObj.CurrentImage.displayHotspots();
                     thisObj.turning = false;
                     thisObj.spinnerDiv.style.cursor = "-webkit-grab";
                     thisObj.spinnerDiv.style.cursor = "grab";
@@ -761,7 +915,7 @@ var CarPicsSpinnerAPI = (function() {
             */
             document.getElementById(this.divId).addEventListener("mousemove", (function(thisObj) {
                 return function(baseEvent) {
-                    if (thisObj.pauseMouseTime > Date.now()) {
+                    if (thisObj.pauseMouseTime > Date.now() || thisObj.panoramaView) {
                         return;
                     }
                     if (thisObj.turnStatus !== true && thisObj.zoomed !== true) {
@@ -775,12 +929,12 @@ var CarPicsSpinnerAPI = (function() {
                         }
                         if (thisObj.enableInertialMove == false) {
                             thisObj.CurrentImage.dragMove(baseEvent, 
-                                thisObj.CurrentImage.HTMLElement.getBoundingClientRect(), true, thisObj.enableInertialMove, thisObj.lastXPosition, thisObj.lastYPosition);
+                                thisObj.CurrentImage.HTMLElement.getBoundingClientRect(), thisObj.enableInertialMove, thisObj.lastXPosition, thisObj.lastYPosition);
                             thisObj.lastXPosition = baseEvent.clientX;
                             thisObj.lastYPosition = baseEvent.clientY;
                         } else {
                             thisObj.CurrentImage.dragMove(baseEvent, 
-                            thisObj.CurrentImage.HTMLElement.getBoundingClientRect(), true, thisObj.enableInertialMove);
+                            thisObj.CurrentImage.HTMLElement.getBoundingClientRect(), thisObj.enableInertialMove);
                         }
                     } else if (thisObj.zoomed == false) {
                         while (thisObj.mouseXPosition - currentXPosition > thisObj.spinSensitivity){
@@ -822,6 +976,18 @@ var CarPicsSpinnerAPI = (function() {
                             thisObj.mouseXPosition = thisObj.mouseXPosition + thisObj.spinSensitivity;
                         } 
                     }
+                  //  CONFLICT NOT SURE
+                        // If spinning was triggered inside a hotspot, remove modalHover
+//                         if (document.getElementById(thisObj.divId+"modalHover")) {
+//                             var modalHover = document.getElementById(thisObj.divId+"modalHover");
+//                             modalHover.parentElement.removeChild(modalHover);
+//                         }
+//                         var difference = thisObj.mouseXPosition - currentXPosition;
+//                         thisObj.displayNextImage(difference);
+//                         thisObj.mouseXPosition = currentXPosition;
+//                         thisObj.turning = true;
+//                         thisObj.mouseYPosition = currentYPosition;
+//                     } 
                 }
             })(this));
 
@@ -834,32 +1000,10 @@ var CarPicsSpinnerAPI = (function() {
             var originalEvent;
             document.getElementById(this.divId).addEventListener("touchstart", (function(thisObj) {
                 return function(event) {
-                    pressTimer=setTimeout((function(thisObj) {
-                        return function() {
-                            if (thisObj.turning == true) {
-                                return;
-                            }
-                            if(thisObj.interacted){
-                                CarPicsGoogleAnalytics('send', 'pageview', {'dimension1':'Taphold'});
-                                thisObj.interacted=true;
-                            }
-                            CarPicsGoogleAnalytics('send', 'pageview', {'dimension2':'Taphold'});
-                            event.preventDefault();
-                            var releaseMouse = thisObj.zoomToggle(event);
-                            if (thisObj.zoomed === true) {
-                                thisObj.spinStatus = false;
-                                thisObj.turnStatus = false;
-                            } else {
-                                thisObj.spinStatus = thisObj.spinDefault;
-                                thisObj.turnStatus = false;
-                            }
-
-                        }
-                    })(thisObj), 300)
                     event.preventDefault();
                     event.returnValue = false;
                     var thisTouch = Date.now();
-                    if (thisObj.zoomed) {
+                    if (thisObj.zoomed || thisObj.panoramaView) {
                         return;
                     }
                     if(thisObj.interacted){
@@ -870,7 +1014,7 @@ var CarPicsSpinnerAPI = (function() {
                     thisObj.spinStatus = false;
                     thisObj.turnStatus = true;
                     var touch = event.targetTouches[0] || event.changedTouches[0];
-                    thisObj.mouseXPosition = touch.pageX
+                    thisObj.mouseXPosition = touch.pageX;
                     thisObj.mouseYPosition = touch.pageY;
                     /*
                     * Touchmove triggers drag spin in mobile.  Does not trigger zoom move.
@@ -888,22 +1032,12 @@ var CarPicsSpinnerAPI = (function() {
                                 var touch = event1.targetTouches[0] || event1.targetTouches[0]
                                 var currentXPosition = touch.pageX;
                                 var currentYPosition = touch.pageY;
-                                if (thisInternal.zoomed == true) {
-                                    thisInternal.CurrentImage.move(thisObj.mouseXPosition, thisObj.mouseYPosition);
-                                } else {
-                                    while (thisInternal.mouseXPosition - currentXPosition > thisInternal.spinSensitivity) {
-                                        thisObj.turning = true;
-                                        thisInternal.displayNextImage(1);
-                                        thisInternal.mouseYPosition = currentYPosition;
-                                        thisInternal.mouseXPosition = thisObj.mouseXPosition - thisObj.spinSensitivity;
-                                    } 
-                                    while (currentXPosition - thisInternal.mouseXPosition > thisInternal.spinSensitivity) {
-                                        thisInternal.mouseYPosition = currentYPosition;
-                                        thisInternal.mouseXPosition = thisObj.mouseXPosition + thisObj.spinSensitivity;
-                                        thisObj.turning = true;
-                                        thisInternal.displayNextImage(-1);
-                                    }
+                                if (thisInternal.zoomed !== true) {
+                                    thisInternal.displayNextImage(thisInternal.mouseXPosition - currentXPosition);
+                                    thisInternal.turning = true;
                                 }
+                                thisInternal.mouseXPosition = currentXPosition;
+                                thisInternal.mouseYPosition = currentYPosition;
                                 thisInternal.pauseMouseTime = Date.now() + 25;
                             }
                         }
@@ -914,20 +1048,19 @@ var CarPicsSpinnerAPI = (function() {
             /*
             * Touchend event ends manual drag - also clears the detector for the taphold pseudo-event
             */
-            var pressTimer;
             document.getElementById(this.divId).addEventListener("touchend", (function(thisObj) {
                 return function(event) {
-                    if (thisObj.mouseDisabled) {
+                    if (thisObj.mouseDisabled || thisObj.panoramaView) {
                         return;
                     }
-                    clearTimeout(pressTimer)
                     thisObj.spinStatus = thisObj.spinDefault;
                     thisObj.turnStatus = false;
                     thisObj.turning = false;
+                    thisObj.CurrentImage.displayHotspots();
                     thisObj.spinnerDiv.style.cursor = "-webkit-grab";
                     thisObj.spinnerDiv.style.cursor = "grab";
                     thisObj.spinnerDiv.style.cursor = "-moz-grab";
-                    document.getElementById(this.divId).addEventListener("touchmove", function(event1) {});
+                    document.getElementById(thisObj.divId).addEventListener("touchmove", function(event1) {});
                 }
             })(this));
         }
@@ -1046,7 +1179,7 @@ var CarPicsSpinnerAPI = (function() {
         /**
         * Allows drag to scroll image within zoomed element
         */
-        this.dragMove = function(baseEvent, offset, zoomed, enableInertialMove, originalX, originalY) {
+        this.dragMove = function(baseEvent, offset, enableInertialMove, originalX, originalY) {
             var parentOffset = this.HTMLElement.parentElement.getBoundingClientRect();
             var clientX = (baseEvent.type !== "touchmove" ? baseEvent.clientX : baseEvent.targetTouches[0].clientX) - parentOffset.left;
             var clientY = (baseEvent.type !== "touchmove" ? baseEvent.clientY : baseEvent.targetTouches[0].clientY) - parentOffset.top;
@@ -1123,7 +1256,7 @@ var CarPicsSpinnerAPI = (function() {
             }
         }
         this.listOfPointsOfInterest = [];
-        this.displayPointsOfInterest = function(source, displayHotspots, divId){
+        this.createPointsOfInterest = function(source, displayHotspots, divId){
             if(typeof source.poi == "undefined"){
                 return;
             }
@@ -1578,8 +1711,8 @@ var CarPicsSpinnerAPI = (function() {
                         } else {
                             return;
                         }
-                        this.HTMLElement.style.left = XOffset / document.documentElement.clientWidth * 100 + 'vw';
-                        this.HTMLElement.style.top = YOffset / document.documentElement.clientWidth * 100 + 'vw';
+                        element.style.left = XOffset / document.documentElement.clientWidth * 100 + 'vw';
+                        element.style.top = YOffset / document.documentElement.clientWidth * 100 + 'vw';
                     }
                 })(this.HTMLElement, poi[i]);
                 // // Modal version 2: cover the whole image
@@ -1705,6 +1838,37 @@ var CarPicsSpinnerAPI = (function() {
         this.getPointsOfInterest = function() {
             return this.listOfPointsOfInterest;
         }
+        this.updateOpacity = function(baseEvent){
+            var spinnerDivPosition = this.HTMLElement.parentElement.getBoundingClientRect();
+            var imgPosition = this.HTMLElement.getBoundingClientRect();
+            var list = this.listOfPointsOfInterest;
+            for (var i=0; i<list.length; i++) {
+                var poi_x = imgPosition.left+list[i].info.x*imgPosition.width/100;
+                var poi_y = imgPosition.top+list[i].info.y*imgPosition.height/100;
+                var mouse_x = baseEvent.clientX;
+                var mouse_y = baseEvent.clientY;
+                var distance = (mouse_x-poi_x)*(mouse_x-poi_x)+(mouse_y-poi_y)*(mouse_y-poi_y);
+                distance = Math.sqrt(distance);
+                var max_distance = spinnerDivPosition.width*spinnerDivPosition.width+spinnerDivPosition.height*spinnerDivPosition.height;
+                max_distance = Math.sqrt(max_distance);
+                var distance_ratio = 1 - distance/max_distance;
+                distance_ratio = distance_ratio*distance_ratio*distance_ratio*distance_ratio;
+                list[i].HTMLElement.style.opacity = distance_ratio;
+            }
+        }
+
+        this.hideHotspots = function(){
+            for (var i=0;i<this.listOfPointsOfInterest.length;i++){
+                this.listOfPointsOfInterest[i].HTMLElement.style.display = "none";
+            }
+        }
+
+        this.displayHotspots = function(){
+            for (var i=0;i<this.listOfPointsOfInterest.length;i++){
+                this.listOfPointsOfInterest[i].HTMLElement.style.display = "block";
+            }
+        }
+
         /*
         * Default Image styles and sets up transitions which make movements nicer.
         */
@@ -1753,9 +1917,12 @@ var CarPicsSpinnerAPI = (function() {
         this.imgElement = document.createElement("img");
         this.HTMLElement = document.createElement("div");
         this.HTMLElement.appendChild(this.imgElement);
+
         this.displayPointsOfInterest(source, displayHotspots, div);
+        this.createPointsOfInterest(source, thisObj.displayHotspots, thisObj.divId);
+
         this.setDefaultImageStyles();
-        this.imgElement.setAttribute("src", "http://cdn.carpics2p0.com/" + source.src);
+        this.imgElement.setAttribute("src", "https://s3-us-west-2.amazonaws.com/cdn.carpics2p0.com/" + source.src);
         this.HTMLElement.setAttribute("id", this.elementId);
         this.imgElement.addEventListener("load", function() {
                 callback();
