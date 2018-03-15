@@ -286,7 +286,7 @@ var CarPicsSpinnerAPI = (function() {
             if (!nextImage.isReady) {
                 return;
             }
-            this.spinnerDiv.style.backgroundImage = "url('" + this.CurrentImage.sourceObject.src + "')";
+            this.spinnerDiv.style.backgroundImage = "url('https://s3-us-west-2.amazonaws.com/cdn.carpics2p0.com/" + this.CurrentImage.sourceObject.src + "')";
             this.spinnerDiv.style.backgroundSize = "100% 100%";
             var previous = this.CurrentImage;
             this.CurrentImage = nextImage;
@@ -295,7 +295,7 @@ var CarPicsSpinnerAPI = (function() {
         }
         this.insertPlaceholder = function(){
             var element = document.getElementById(this.divId);
-            element.style.backgroundImage="url('http://resources.carpics2p0.com/Rotation/checkerboard-backgrounds-wallpapers.jpg')"
+            element.style.backgroundImage="url('https://s3-us-west-2.amazonaws.com/resources.carpics2p0.com/Rotation/checkerboard-backgrounds-wallpapers.jpg')";
             element.style.repeat="repeat"
         }
         this.loadSpinner = function(){
@@ -689,7 +689,7 @@ var CarPicsSpinnerAPI = (function() {
         this.HTMLElement = document.createElement("div");
         this.HTMLElement.appendChild(this.imgElement);
         this.setDefaultImageStyles();
-        this.imgElement.setAttribute("src", source.src);
+        this.imgElement.setAttribute("src", "https://s3-us-west-2.amazonaws.com/cdn.carpics2p0.com/" + source.src);
         this.HTMLElement.setAttribute("id", this.elementId);
         this.imgElement.addEventListener("load", function() {
                 callback();
@@ -718,7 +718,7 @@ var CarPicsSpinnerAPI = (function() {
                 autospinDirection: div.getAttribute("autospinDirection") == "left" ? -1 : 1,
                 spinOnLoad: div.getAttribute("spinOnLoad"),
                 divId: div.getAttribute("id"),
-                sourceURL: "http://feed.carpics2p0.com/rest/spinner/s3?dealer="+div.getAttribute("dealer")
+                sourceURL: "https://feed.carpics2p0.com/rest/spinner/s3?dealer="+div.getAttribute("dealer")
                 +"&vin=" + div.getAttribute("vin"),
                 autospinSleep: div.getAttribute("autospinSleep"),
                 spinSensitivity: div.getAttribute("spinSensitivity"),
